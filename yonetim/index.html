@@ -302,13 +302,15 @@ function renderCustomer(){
  const dateOnly=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
  const dateText=d=>d?d.toLocaleDateString('tr-TR',{day:'2-digit',month:'short',year:'numeric'}):'Vade tarihi yok';
  const trackingToday=dateOnly(now),trackingWeek=new Date(trackingToday.getTime()+7*86400000);
+ const worklistToday=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Istanbul'}).format(now);
  const noteRecords=workTasks.filter(t=>!t.deleted&&!t.clientOnly&&!t.calendarManaged&&String(t.title||'').trim()).map(t=>{
   const date=parseDate(t.due);
   const dueKey=String(t.due||'');
-  const status=t.done?'Tamamlandı':t.status==='waiting'?(t.waitingReason||'Beklemede'):dueKey&&dueKey<now.toISOString().slice(0,10)?'Gecikti':dueKey===now.toISOString().slice(0,10)?'Bugün':'Planlandı';
-  return {title:String(t.title).trim(),date,status,done:!!t.done,starred:!!t.starred,created:Number(t.created)||0,updated:Number(t.updated)||0};
+  const waiting=t.status==='waiting';
+  const status=t.done?'Tamamlandı':waiting?(t.waitingReason||'Beklemede'):dueKey&&dueKey<worklistToday?'Gecikti':dueKey===worklistToday?'Bugün':'Planlandı';
+  return {title:String(t.title).trim(),date,status,done:!!t.done,waiting,starred:!!t.starred,created:Number(t.created)||0,updated:Number(t.updated)||0};
  }).sort((a,b)=>{
-  const rank=x=>x.done?4:x.status==='Gecikti'?0:x.status==='Beklemede'?1:x.status==='Bugün'?2:3;
+  const rank=x=>x.done?4:x.status==='Gecikti'?0:x.waiting?1:x.status==='Bugün'?2:3;
   return rank(a)-rank(b)||Number(b.starred)-Number(a.starred)||(a.date?.getTime()||Number.MAX_SAFE_INTEGER)-(b.date?.getTime()||Number.MAX_SAFE_INTEGER)||b.updated-a.updated||b.created-a.created;
  });
  const receivableRecords=[];
