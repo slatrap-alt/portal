@@ -32,13 +32,30 @@
 </section>
 <div class="foot">ACANLAR MOBİLYA DEKORASYON · YÖNETİCİ MERKEZİ</div>
 </div>
-<div class="locked" id="login-screen"><form class="login" id="login-form"><h2>Yönetici girişi</h2><p>Diğer Acanlar uygulamalarında kullandığın atölye hesabıyla giriş yap. Bu ekran kayıtları yalnızca görüntüler, mevcut uygulama verilerini değiştirmez.</p><div class="field"><label>E-posta</label><input id="email" type="email" autocomplete="username" required></div><div class="field"><label>Şifre</label><input id="password" type="password" autocomplete="current-password" required></div><div class="err" id="error"></div><button class="primary" id="login-button">Yönetici ekranını aç</button></form></div>
+<div class="locked" id="login-screen"><form class="login" id="login-form" onsubmit="return window.acanlarLogin(event)"><h2>Yönetici girişi</h2><p>Diğer Acanlar uygulamalarında kullandığın atölye hesabıyla giriş yap. Bu ekran kayıtları yalnızca görüntüler, mevcut uygulama verilerini değiştirmez.</p><div class="field"><label>E-posta</label><input id="email" type="email" autocomplete="username" required></div><div class="field"><label>Şifre</label><input id="password" type="password" autocomplete="current-password" required></div><div class="err" id="error"></div><button class="primary" id="login-button">Yönetici ekranını aç</button></form></div>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" onerror="document.getElementById('error').textContent='Firebase bağlantı dosyası yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.'"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" onerror="document.getElementById('error').textContent='Giriş servisi yüklenemedi. Sayfayı yenile veya farklı tarayıcı dene.'"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" onerror="document.getElementById('error').textContent='Veri servisi yüklenemedi. Sayfayı yenile.'"></script>
 <script>
 (function(){
 const cfg={apiKey:'AIzaSyB3Pfgk5Z8x4c95BqfPcnNZHNYQ01pQpSU',authDomain:'oykum-6de70.firebaseapp.com',projectId:'oykum-6de70',storageBucket:'oykum-6de70.firebasestorage.app',messagingSenderId:'908914397464',appId:'1:908914397464:web:63bcd5f48fcce81cf2ce6d'};
 let app,auth,db,user=null,stops=[],sourceState={stock:false,cut:false,pricing:false,manual:false},stockCards=[],stockLots=[],cutRecords=[],pricingQuotes=[],manualQuotes=[];
-const $=id=>document.getElementById(id),money=n=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:0}).format(Number(n)||0),num=n=>Number(n)||0;
+const $=id=>document.getElementById(id);
+window.acanlarLogin=async function(e){
+ if(e)e.preventDefault();
+ const btn=$('login-button'),err=$('error');
+ btn.disabled=true;btn.textContent='Bağlanıyor…';err.textContent='Giriş servisine bağlanılıyor…';
+ try{
+  const fb=window.firebase;
+  if(!fb||!fb.apps||!fb.apps.length) throw new Error('Firebase yüklenemedi. İnternet bağlantısını kontrol edip sayfayı yenile.');
+  const a=fb.apps.find(x=>x.name==='acanlar-manager')||fb.app();
+  await a.auth().signInWithEmailAndPassword($('email').value.trim(),$('password').value);
+  err.textContent='Giriş başarılı, panel açılıyor…';
+ }catch(ex){
+  const m={'auth/invalid-email':'E-posta adresi geçersiz.','auth/user-not-found':'Bu e-posta ile hesap bulunamadı.','auth/wrong-password':'Şifre hatalı.','auth/invalid-credential':'E-posta veya şifre hatalı.','auth/too-many-requests':'Çok fazla deneme yapıldı; biraz bekle.','auth/network-request-failed':'İnternet bağlantısı kurulamadı.'};
+  err.textContent=m[ex.code]||('Giriş hatası: '+(ex.message||ex.code||'Bilinmeyen hata'));
+ }finally{btn.disabled=false;btn.textContent='Yönetici ekranını aç'}
+ return false;
+};
+const money=n=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:0}).format(Number(n)||0),num=n=>Number(n)||0;
 const today=new Date(),monthStart=new Date(today.getFullYear(),today.getMonth(),1).getTime();
 $('today').textContent=new Intl.DateTimeFormat('tr-TR',{dateStyle:'full'}).format(today);
 function setSource(name,ok,msg){sourceState[name]=ok;renderSources();$('connection').textContent=Object.values(sourceState).every(Boolean)?'Tüm kaynaklar bağlı':Object.values(sourceState).some(Boolean)?'Bazı kaynaklar bağlı':'Veri kaynaklarına bağlanıyor';$('connection').className='status '+(Object.values(sourceState).some(Boolean)?'ok':'')}
@@ -74,13 +91,7 @@ try{
  auth=app.auth();db=app.firestore();
  auth.onAuthStateChanged(connect,err=>{$('error').textContent='Oturum kontrolü yapılamadı: '+(err.message||err.code||'Bağlantı hatası')});
 }catch(e){$('error').textContent='Başlatma hatası: '+(e.message||e)}
-$('login-form').addEventListener('submit',async e=>{e.preventDefault();$('login-button').disabled=true;$('error').textContent='';try{
- if(!auth) throw new Error('Giriş servisi henüz hazır değil. Sayfayı yenileyip tekrar dene.');
- await auth.signInWithEmailAndPassword($('email').value.trim(),$('password').value);
-}catch(err){
- const messages={'auth/invalid-email':'E-posta adresi geçersiz.','auth/user-not-found':'Bu e-posta ile kayıtlı hesap bulunamadı.','auth/wrong-password':'Şifre hatalı.','auth/invalid-credential':'E-posta veya şifre hatalı.','auth/too-many-requests':'Çok fazla deneme yapıldı. Bir süre bekleyip tekrar dene.','auth/network-request-failed':'İnternet bağlantısı kurulamadı.'};
- $('error').textContent=messages[err.code]||('Giriş yapılamadı: '+(err.message||err.code||'Bilinmeyen hata'));
-}finally{$('login-button').disabled=false}});
+
 $('logout').addEventListener('click',()=>auth.signOut());
 })();
 </script></body></html>
