@@ -392,7 +392,7 @@ function renderCustomer(){
 }
 function renderAlerts(){
  const now=new Date(),todayKey=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
- const parseAlertDate=v=>{if(!v)return null;if(v instanceof Date)return isNaN(v)?null:v;if(typeof v==='number'){const d=new Date(v);return isNaN(d)?null:d}const raw=String(v).trim();if(!raw)return null;const tr=raw.match(/^(\\d{1,2})[./-](\\d{1,2})[./-](\\d{4})$/);const iso=raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);const d=tr?new Date(+tr[3],+tr[2]-1,+tr[1]):iso?new Date(+iso[1],+iso[2]-1,+iso[3]):new Date(raw);return isNaN(d)?null:d};
+ const parseAlertDate=v=>{if(!v)return null;if(v instanceof Date)return isNaN(v)?null:v;if(typeof v==='number'){const d=new Date(v);return isNaN(d)?null:d}const raw=String(v).trim();if(!raw)return null;const tr=raw.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);const iso=raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);const d=tr?new Date(+tr[3],+tr[2]-1,+tr[1]):iso?new Date(+iso[1],+iso[2]-1,+iso[3]):new Date(raw);return isNaN(d)?null:d};
  const dayKey=d=>d?new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime():null;
  const alerts=[];
  if(sourceState.stock){for(const c of stockCards){const q=stockLots.filter(l=>l.cardId===c.id).reduce((a,l)=>a+num(l.remaining),0);if(num(c.min)>0&&q<=num(c.min))alerts.push({level:'critical',kind:'STOK',title:(c.type||'Malzeme')+' · '+(c.decor||'Dekor'),detail:'Mevcut '+q+' plaka · Minimum '+num(c.min)+' plaka',rank:0})}}
