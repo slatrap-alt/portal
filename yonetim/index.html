@@ -47,8 +47,9 @@ window.acanlarLogin=async function(e){
   const fb=window.firebase;
   if(!fb||!fb.apps||!fb.apps.length) throw new Error('Firebase yüklenemedi. İnternet bağlantısını kontrol edip sayfayı yenile.');
   const a=fb.apps.find(x=>x.name==='acanlar-manager')||fb.app();
-  await a.auth().signInWithEmailAndPassword($('email').value.trim(),$('password').value);
+  const credential=await a.auth().signInWithEmailAndPassword($('email').value.trim(),$('password').value);
   err.textContent='Giriş başarılı, panel açılıyor…';
+  connect(credential.user);
  }catch(ex){
   const m={'auth/invalid-email':'E-posta adresi geçersiz.','auth/user-not-found':'Bu e-posta ile hesap bulunamadı.','auth/wrong-password':'Şifre hatalı.','auth/invalid-credential':'E-posta veya şifre hatalı.','auth/too-many-requests':'Çok fazla deneme yapıldı; biraz bekle.','auth/network-request-failed':'İnternet bağlantısı kurulamadı.'};
   err.textContent=m[ex.code]||('Giriş hatası: '+(ex.message||ex.code||'Bilinmeyen hata'));
