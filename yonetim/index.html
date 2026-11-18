@@ -222,7 +222,13 @@ body{background:linear-gradient(180deg,#e7edf2 0%,#edf2f6 46%,#e8eef3 100%)}
  <div class="source-list" id="sources"><div class="source-item pending"><span class="source-icon">◌</span><span class="source-copy"><strong>Kaynaklar yükleniyor</strong><small>Firestore bağlantısı bekleniyor</small></span><span class="source-state">BEKLENİYOR</span></div></div>
  <div class="source-footer"><span class="source-pulse"></span> Canlı eşitleme · Yalnızca okuma bağlantısı</div>
 </div>
-</div></section>
+</div>
+<div class="panel" style="margin-top:13px">
+ <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div class="panel-title" style="margin-bottom:0">Elimde bulunan plakalar</div><span class="tag green" id="available-stock-count">Stok verisi bekleniyor</span></div>
+ <p style="font-size:10px;color:#8795a0;margin:6px 0 10px">Depoda kalan plakalar · Malzeme ve ölçü bazında güncel adet</p>
+ <div class="rows" id="available-stock-list"><div class="empty">Stok verisi yükleniyor…</div></div>
+</div>
+</section>
 <div class="foot">ACANLAR MOBİLYA DEKORASYON · YÖNETİCİ MERKEZİ</div>
 </div>
 <div class="locked" id="login-screen"><form class="login" id="login-form"><h2>Yönetici girişi</h2><p>Diğer Acanlar uygulamalarında kullandığın atölye hesabıyla giriş yap. Bu ekran kayıtları yalnızca görüntüler, mevcut uygulama verilerini değiştirmez.</p><div class="field"><label>E-posta</label><input id="email" type="email" autocomplete="username" required></div><div class="field"><label>Şifre</label><input id="password" type="password" autocomplete="current-password" required></div><div class="err" id="error"></div><button type="button" class="primary" id="login-button" onclick="document.getElementById('error').textContent='Buton tıklaması algılandı…';if(window.acanlarLogin){window.acanlarLogin(event)}else{document.getElementById('error').textContent='Giriş kodu yüklenemedi. Sayfayı kapatıp yeniden aç.'}">Yönetici ekranını aç</button><div style="text-align:center;font-size:9px;color:#a2abb2;margin-top:10px">Sürüm: 18.11.2026 · Giriş kontrolü</div></form></div>
@@ -387,6 +393,10 @@ function render(){
  $('month-quotes').textContent=(sourceState.pricing||sourceState.manual)?thisMonth.length:'—';$('quote-total').textContent=(sourceState.pricing||sourceState.manual)?money(total):'—';$('quote-hint').textContent=thisMonth.length+' teklif kaydı · iki teklif uygulaması';
  $('cut-count').textContent=sourceState.cut?cutRecords.length:'—';
  $('critical-list').innerHTML=sourceState.stock?(critical.length?critical.slice(0,8).map(c=>{const n=stockLots.filter(l=>l.cardId===c.id).reduce((a,l)=>a+num(l.remaining),0);return '<div class="row"><span><b>'+String(c.type||'Malzeme')+' · '+String(c.decor||'')+'</b><small>'+String(c.brand||'')+' · '+String(c.size||'')+'</small></span><span class="tag '+(n<=0?'red':'amber')+'">'+n+' / min '+num(c.min)+'</span></div>'}).join(''):'<div class="empty">Kritik seviyede malzeme bulunmuyor.</div>'):'<div class="empty">Stok kaynağı henüz bağlanmadı.</div>';
+ const availableCards=stockCards.map(c=>({card:c,qty:stockLots.filter(l=>l.cardId===c.id).reduce((a,l)=>a+Math.max(0,num(l.remaining)),0)})).filter(x=>x.qty>0).sort((a,b)=>String(a.card.type||'').localeCompare(String(b.card.type||''),'tr')||String(a.card.decor||'').localeCompare(String(b.card.decor||''),'tr'));
+ const availableTotal=availableCards.reduce((a,x)=>a+x.qty,0);
+ $('available-stock-list').innerHTML=sourceState.stock?(availableCards.length?availableCards.map(({card:c,qty:n})=>'<div class="row"><span><b>'+safeText(c.type||'Malzeme')+' · '+safeText(c.decor||'')+'</b><small>'+safeText(c.brand||'')+' · '+safeText(c.thickness||'')+' mm · '+safeText(c.size||'')+'</small></span><span class="tag green">'+new Intl.NumberFormat('tr-TR').format(n)+' plaka</span></div>').join(''):'<div class="empty">Şu anda depoda kalan plaka bulunmuyor.</div>'):'<div class="empty">Stok kaynağı henüz bağlanmadı.</div>';
+ $('available-stock-count').textContent=sourceState.stock?availableCards.length+' malzeme · '+new Intl.NumberFormat('tr-TR').format(availableTotal)+' plaka':'Stok verisi bekleniyor';
 }
 function stopAll(){stops.forEach(s=>{try{s()}catch(e){}});stops=[];sourceState={stock:false,cut:false,pricing:false,manual:false,clients:false,tasks:false};sourceStatus={stock:'pending',cut:'pending',pricing:'pending',manual:'pending',clients:'pending',tasks:'pending'};customerFiles=[];workTasks=[];renderSources()}
 function connect(u){stopAll();user=u;if(!u){$('dashboard').hidden=true;$('dashboard').style.display='none';$('login-screen').hidden=false;$('login-screen').style.display='grid';return}
