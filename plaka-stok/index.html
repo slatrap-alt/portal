@@ -272,7 +272,7 @@ function openStockReport(mode){
  const linkedLot=m=>db.lots.find(l=>l.id===m.lot);
  // Dönem toplamları sadece seçilen tarihlerdeki giriş/çıkış hareketlerinden hesaplanır.
  // Birim fiyat için hareketin bağlı olduğu LOT fiyatı esas alınır; eski çıkışlarda boş fiyat varsa da maliyet bulunur.
- const movementUnitPrice=m=>{const lot=linkedLot(m);return lot?Number(lot.price||0):Number(m.price||0)};
+ const movementUnitPrice=m=>{const lot=linkedLot(m),lotPrice=Number(lot?.price||0);return lotPrice>0?lotPrice:Number(m.price||0)};
  const purchaseQty=purchases.reduce((a,m)=>a+Number(m.qty||0),0),purchaseValue=purchases.reduce((a,m)=>a+Number(m.qty||0)*movementUnitPrice(m),0);
  const consumedQty=consumptions.reduce((a,m)=>a+Number(m.qty||0),0),consumedValue=consumptions.reduce((a,m)=>a+Number(m.qty||0)*movementUnitPrice(m),0);
  const qty=db.cards.reduce((a,c)=>a+total(c),0),cost=db.cards.reduce((a,c)=>a+value(c),0),openLots=db.lots.filter(l=>Number(l.remaining)>0).length;
