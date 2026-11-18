@@ -120,6 +120,37 @@ tbody tr:hover td{background:#f0f7fd}
  #cloud-account{padding:8px;font-size:9px}
  .topright{gap:4px}
 }
+
+.report-preview-back{position:fixed;inset:0;z-index:60;background:#0c2036c9;display:none;overflow:auto;padding:22px}
+.report-preview-back.open{display:block}
+.report-preview-wrap{width:min(980px,100%);margin:auto}
+.report-preview-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 auto 14px;color:white}
+.report-preview-actions .right{display:flex;gap:8px}
+.report-sheet{background:white;color:#203247;border-radius:14px;box-shadow:0 24px 80px #06142655;padding:38px 42px;min-height:700px}
+.report-brand{display:flex;justify-content:space-between;gap:18px;padding-bottom:20px;border-bottom:3px solid #1c4d72}
+.report-brand-name{font-size:23px;font-weight:900;letter-spacing:2px;color:#143956}
+.report-brand-sub{font-size:9px;letter-spacing:1.5px;color:#6e8498;font-weight:800}
+.report-meta{text-align:right;font-size:10px;line-height:1.8;color:#6b7c8e}
+.report-kicker{font-size:9px;color:#3979b8;font-weight:850;letter-spacing:2px;margin-top:22px}
+.report-title{font-size:27px;color:#142f49;font-weight:850;margin:5px 0}
+.report-desc{font-size:10px;color:#6c7d8d}
+.report-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:22px 0}
+.report-stat{padding:13px;border:1px solid #e2eaf1;border-radius:9px;background:linear-gradient(145deg,#f1f7fc,#fff)}
+.report-stat span{display:block;color:#718398;font-size:9px;font-weight:750;text-transform:uppercase}
+.report-stat b{display:block;color:#17466b;font-size:19px;margin-top:5px}
+.report-section{margin-top:22px}
+.report-section h3{font-size:12px;color:#17466b;margin:0 0 10px;padding-left:9px;border-left:3px solid #3988c4}
+.report-table{width:100%;border-collapse:collapse;white-space:normal}
+.report-table th{background:#edf3f8;color:#60768a;font-size:8px;padding:9px 7px;text-align:left}
+.report-table td{font-size:9px;padding:8px 7px;border-bottom:1px solid #e9eef3;color:#2b3c4c;vertical-align:top}
+.report-table tr:nth-child(even) td{background:#fafcfe}
+.report-in{color:#168154!important;font-weight:800}.report-out{color:#b46b21!important;font-weight:800}
+.report-total{margin-top:14px;padding:13px 16px;background:#eff6fb;border-radius:9px;display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:#17466b}
+.report-footer{margin-top:30px;padding-top:12px;border-top:1px solid #e1e8ee;display:flex;justify-content:space-between;color:#8795a3;font-size:8px}
+.report-empty{padding:22px;text-align:center;color:#8190a0;font-size:10px;border:1px dashed #d8e1e9}
+@media(max-width:680px){.report-preview-back{padding:9px}.report-sheet{padding:20px 14px;min-height:0}.report-stats{grid-template-columns:repeat(2,1fr)}.report-stat{padding:9px}.report-stat b{font-size:16px}.report-table th,.report-table td{padding:6px 4px;font-size:7px}.report-title{font-size:21px}.report-brand-name{font-size:18px}.report-meta{font-size:8px}}
+@page{size:A4 portrait;margin:12mm}
+@media print{body{background:white!important}body>*{display:none!important}#report-preview-back{display:block!important;position:static!important;padding:0!important;background:white!important;overflow:visible!important}.report-preview-wrap{width:100%!important}.report-preview-actions{display:none!important}.report-sheet{padding:0!important;min-height:0!important;box-shadow:none!important;border-radius:0!important}.report-table tr{break-inside:avoid}.report-stats,.report-brand,.report-total{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -170,7 +201,7 @@ tbody tr:hover td{background:#f0f7fd}
    <div class="panel"><div class="toolbar"><div class="search"><span>⌕</span><input id="move-search" placeholder="Malzeme, işlem veya açıklama ara..." oninput="renderMoves()"></div><select class="btn" id="move-filter" onchange="renderMoves()"><option value="">Tüm hareketler</option><option value="Giriş">Giriş</option><option value="Çıkış">Çıkış</option><option value="Fire">Fire</option><option value="Proje">Proje</option></select></div><div class="tablewrap"><table><thead><tr><th>Tarih</th><th>İşlem</th><th>Malzeme</th><th>LOT</th><th>Adet</th><th>Birim fiyat</th><th>Açıklama</th><th></th></tr></thead><tbody id="moves-body"></tbody></table></div></div>
   </section>
   <section class="view" id="view-reports">
-   <div class="pagehead"><div><div class="eyebrow">ENVANTER ANALİZİ</div><h1>Stok Raporları</h1><p class="sub">Mevcut envanterin ve kalan alış partilerinin maliyet özeti.</p></div><div class="actions"><button class="btn" onclick="exportCsv()">↓ Stok raporunu indir</button></div></div>
+   <div class="pagehead"><div><div class="eyebrow">ENVANTER ANALİZİ</div><h1>Stok Raporları</h1><p class="sub">Mevcut envanterini veya tüm giriş-çıkış geçmişini PDF rapor olarak hazırla.</p></div><div class="actions"><button class="btn soft" onclick="openStockReport('current')">▤ Mevcut durum PDF</button><button class="btn primary" onclick="openStockReport('all')">⇅ Tüm hareketler PDF</button></div></div>
    <div class="stats"><div class="stat"><div class="stat-label">Toplam plaka</div><div class="stat-value" id="r-qty">0</div></div><div class="stat"><div class="stat-label">Toplam kalan maliyet</div><div class="stat-value" id="r-cost">₺0</div></div><div class="stat"><div class="stat-label">Açık LOT</div><div class="stat-value" id="r-lots">0</div></div><div class="stat"><div class="stat-label">Toplam stok kartı</div><div class="stat-value" id="r-cards">0</div></div></div>
    <div class="panel"><div class="panelhead"><div><h2>Malzeme türüne göre dağılım</h2><p>Mevcut plaka adetleri</p></div></div><div class="barlist" id="type-bars"></div></div>
    <div class="panel"><div class="panelhead"><div><h2>Stok değerleri</h2><p>LOT bazında kalan maliyet toplamı</p></div></div><div class="tablewrap"><table><thead><tr><th>Malzeme</th><th>Plaka adedi</th><th>Kalan maliyet</th><th>Ortalama birim maliyet</th><th></th></tr></thead><tbody id="report-body"></tbody></table></div></div>
@@ -180,6 +211,7 @@ tbody tr:hover td{background:#f0f7fd}
 </div>
 <div class="modalback" id="modalback" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modalhead"><h3 id="modal-title">Yeni kayıt</h3><button class="close" onclick="closeModal()">✕</button></div><div class="modalbody" id="modal-body"></div><div class="modalfoot"><button class="btn" onclick="closeModal()">Vazgeç</button><button class="btn primary" id="modal-save">Kaydet</button></div></div></div>
 <div class="modalback" id="stock-auth-modal"><div class="modal"><div class="modalhead"><h3>Atölye hesabına bağlan</h3><button class="close" onclick="stockAuthClose()">✕</button></div><div class="modalbody"><p style="margin-top:0;color:#718096">Kesim programında kullandığın mevcut e-posta ve şifreyle giriş yap.</p><div class="formgrid"><div class="field wide"><label>E-posta</label><input id="stock-email" type="email" autocomplete="username" required></div><div class="field wide"><label>Şifre</label><input id="stock-password" type="password" autocomplete="current-password" required></div></div><p id="stock-auth-error" style="color:#c65a5a;font-size:12px"></p></div><div class="modalfoot"><button class="btn" onclick="stockAuthClose()">Vazgeç</button><button class="btn primary" id="stock-auth-submit" onclick="stockLogin()">Giriş yap</button></div></div></div>
+<div class="report-preview-back" id="report-preview-back" onclick="if(event.target===this)closeStockReport()"><div class="report-preview-wrap"><div class="report-preview-actions"><b>📄 Rapor önizleme</b><div class="right"><button class="btn" onclick="closeStockReport()">Kapat</button><button class="btn primary" onclick="printStockReport()">↓ PDF olarak kaydet</button></div></div><article class="report-sheet" id="report-sheet"></article></div></div>
 <div class="notice" id="notice"></div>
 <script>
 const KEY='acanlar_plaka_stok_demo_v1';
@@ -222,6 +254,20 @@ function updateLotOptions(){let c=val('f-card'),sel=document.getElementById('f-l
 function closeModal(){document.getElementById('modalback').classList.remove('open')}
 function cardActions(id){let c=db.cards.find(x=>x.id===id);if(!c)return;let action=prompt('Stok kartı: '+cardName(c)+'\n1 = Plaka girişi\n2 = Plaka çıkışı\n3 = Stok kartını düzenle\n4 = Kartı sil (yalnızca hareket yoksa)');if(action==='1'){openModal('entry');setTimeout(()=>{const s=document.getElementById('f-card');if(s)s.value=id},0)}else if(action==='2'){openModal('issue');setTimeout(()=>{const s=document.getElementById('f-card');if(s){s.value=id;updateLotOptions()}},0)}else if(action==='3')openModal('edit-card',id);else if(action==='4'){if(db.lots.some(l=>l.cardId===id)){toast('Hareketi olan kart silinemez.');return}db.cards=db.cards.filter(x=>x.id!==id);save();toast('Kart silindi.')} }
 function exportCsv(){let lines=[['Malzeme','Marka','Dekor','Kalınlık mm','Ölçü','Mevcut adet','Stok değeri TL'],...db.cards.map(c=>[c.type,c.brand,c.decor,c.thickness,c.size,total(c),value(c)])];let csv='\uFEFF'+lines.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(';')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='acanlar-plaka-stok-raporu.csv';a.click();URL.revokeObjectURL(a.href)}
+
+function openStockReport(mode){
+ const stamp=new Date().toLocaleDateString('tr-TR')+' · '+new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+ const qty=db.cards.reduce((a,c)=>a+total(c),0),cost=db.cards.reduce((a,c)=>a+value(c),0),openLots=db.lots.filter(l=>Number(l.remaining)>0).length;
+ const cards=db.cards.slice().sort((a,b)=>(a.type+' '+a.decor).localeCompare(b.type+' '+b.decor,'tr'));
+ const inv=cards.map(c=>'<tr><td><b>'+esc(c.type)+' · '+esc(c.decor)+'</b><br><small>'+esc(c.brand)+' · '+esc(c.thickness)+' mm</small></td><td>'+esc(c.size)+'</td><td><b>'+fmt(total(c))+' plaka</b></td><td>'+fmt(c.min)+'</td><td>'+money(value(c))+'</td></tr>').join('');
+ const moves=db.moves.map((m,i)=>({m,i})).sort((a,b)=>(a.m.date||'').localeCompare(b.m.date||'')||a.i-b.i).map(({m})=>{const c=db.cards.find(x=>x.id===m.cardId)||{};return '<tr><td>'+dateTR(m.date)+'</td><td><b>'+esc(m.kind||'İşlem')+'</b></td><td>'+esc(cardName(c))+'<br><small>'+esc(c.brand||'')+'</small></td><td>'+esc(m.lot||'—')+'</td><td class="'+(m.kind==='Giriş'?'report-in':'report-out')+'">'+(m.kind==='Giriş'?'+':'−')+fmt(m.qty)+' plaka</td><td>'+money(m.price||0)+'</td><td>'+esc(m.note||'—')+'</td></tr>'}).join('');
+ const incoming=db.moves.filter(m=>m.kind==='Giriş').reduce((a,m)=>a+Number(m.qty||0),0),outgoing=db.moves.filter(m=>m.kind!=='Giriş').reduce((a,m)=>a+Number(m.qty||0),0),detail=mode==='all';
+ document.getElementById('report-sheet').innerHTML='<div class="report-brand"><div><div class="report-brand-name">ACANLAR</div><div class="report-brand-sub">MOBİLYA DEKORASYON · DEPO KONTROL MERKEZİ</div></div><div class="report-meta"><b>ENVANTER RAPORU</b><br>Rapor tarihi: '+stamp+'<br>Rapor türü: '+(detail?'Tüm hareketler':'Mevcut durum')+'</div></div><div class="report-kicker">STOK YÖNETİMİ</div><div class="report-title">'+(detail?'Stok ve Hareket Dökümü':'Mevcut Stok Durum Raporu')+'</div><div class="report-desc">'+(detail?'Malzeme envanteri ile kayıtlı tüm stok giriş ve çıkış işlemlerinin ayrıntılı dökümü.':'Rapor tarihi itibarıyla kayıtlı malzemelerin mevcut plaka miktarları ve kalan stok maliyetleri.')+'</div><div class="report-stats"><div class="report-stat"><span>Mevcut plaka</span><b>'+fmt(qty)+'</b></div><div class="report-stat"><span>Kalan stok maliyeti</span><b>'+money(cost)+'</b></div><div class="report-stat"><span>Açık LOT</span><b>'+fmt(openLots)+'</b></div><div class="report-stat"><span>Stok çeşidi</span><b>'+fmt(cards.length)+'</b></div></div><section class="report-section"><h3>Mevcut stok durumu</h3>'+(cards.length?'<table class="report-table"><thead><tr><th>MALZEME / DEKOR</th><th>PLAKA ÖLÇÜSÜ</th><th>MEVCUT</th><th>MİN. STOK</th><th>KALAN MALİYET</th></tr></thead><tbody>'+inv+'</tbody></table>':'<div class="report-empty">Kayıtlı stok kartı bulunmuyor.</div>')+'<div class="report-total"><span>TOPLAM MEVCUT STOK</span><span>'+fmt(qty)+' PLAKA · '+money(cost)+'</span></div></section>'+(detail?'<section class="report-section"><h3>Stok hareketlerinin tamamı</h3><p class="report-desc">Giriş: <b class="report-in">'+fmt(incoming)+' plaka</b> · Çıkış / fire / diğer: <b class="report-out">'+fmt(outgoing)+' plaka</b> · Kayıt sayısı: <b>'+db.moves.length+'</b></p>'+(db.moves.length?'<table class="report-table"><thead><tr><th>TARİH</th><th>İŞLEM</th><th>MALZEME</th><th>LOT</th><th>ADET</th><th>BİRİM FİYAT</th><th>AÇIKLAMA</th></tr></thead><tbody>'+moves+'</tbody></table>':'<div class="report-empty">Henüz stok hareketi kaydedilmemiş.</div>')+'</section>':'')+'<div class="report-footer"><span>ACANLAR MOBİLYA DEKORASYON · STOK YÖNETİMİ</span><span>Sistem kayıtlarından oluşturulmuştur.</span></div>';
+ document.getElementById('report-preview-back').classList.add('open');
+}
+function closeStockReport(){document.getElementById('report-preview-back').classList.remove('open')}
+function printStockReport(){window.print()}
+
 renderAll();
 
 // Firebase cloud sync: same project and email/password account as the cutting app.
