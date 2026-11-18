@@ -303,7 +303,7 @@ function renderCustomer(){
  const dateText=d=>d?d.toLocaleDateString('tr-TR',{day:'2-digit',month:'short',year:'numeric'}):'Vade tarihi yok';
  const trackingToday=dateOnly(now),trackingWeek=new Date(trackingToday.getTime()+7*86400000);
  const worklistToday=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Istanbul'}).format(now);
- const noteRecords=workTasks.filter(t=>!t.deleted&&!t.clientOnly&&!t.calendarManaged&&String(t.title||'').trim()).map(t=>{
+ const noteRecords=workTasks.filter(t=>!t.deleted&&!t.done&&!t.clientOnly&&!t.calendarManaged&&String(t.title||'').trim()).map(t=>{
   const date=parseDate(t.due);
   const dueKey=String(t.due||'');
   const waiting=t.status==='waiting';
