@@ -300,7 +300,7 @@ function supplierRequestItems(){
   const rawPrice=row.querySelector('[data-field="price"]')?.value??'';
   const price=String(rawPrice).trim()===''?null:Number(rawPrice);
   return {cardId,card,qty,unitPrice:price,note:row.querySelector('[data-field="note"]')?.value?.trim()||''};
- }).filter(x=>x.cardId||x.qty||x.unitPrice!==null||x.note);
+ }).filter(x=>x.qty>0||x.note);
 }
 function addSupplierRequestRow(item={}){
  const body=document.getElementById('supplier-request-items');if(!body)return;
@@ -309,7 +309,7 @@ function addSupplierRequestRow(item={}){
  const options=db.cards.map(c=>'<option value="'+esc(c.id)+'" '+(item.cardId===c.id?'selected':'')+'>'+esc(cardName(c)+' · '+c.brand+' · '+c.size)+'</option>').join('');
  const card=db.cards.find(c=>c.id===item.cardId)||db.cards[0];
  const p=item.unitPrice!==undefined&&item.unitPrice!==null?item.unitPrice:(Number(card.defaultUnitPrice)>0?Number(card.defaultUnitPrice):'');
- row.innerHTML='<td><select class="proc-card" data-field="card" onchange="supplierRequestCardChanged(this)">'+options+'</select></td><td><input class="proc-qty" data-field="qty" type="number" min="1" step="1" value="'+(item.qty||'')+'" placeholder="Adet" oninput="updateSupplierRequestTotal()"></td><td><input class="proc-price" data-field="price" type="number" min="0" step=".01" value="'+(p===''?'':esc(p))+'" placeholder="Teklif bekleniyor" oninput="updateSupplierRequestTotal()"></td><td><input data-field="note" value="'+esc(item.note||'')+'" placeholder="Örn. aynı partiden"></td><td><button class="proc-remove" type="button" title="Kalemi sil" onclick="this.closest(\\'tr\\').remove();updateSupplierRequestTotal()">✕</button></td>';
+ row.innerHTML='<td><select class="proc-card" data-field="card" onchange="supplierRequestCardChanged(this)">'+options+'</select></td><td><input class="proc-qty" data-field="qty" type="number" min="1" step="1" value="'+(item.qty||'')+'" placeholder="Adet" oninput="updateSupplierRequestTotal()"></td><td><input class="proc-price" data-field="price" type="number" min="0" step=".01" value="'+(p===''?'':esc(p))+'" placeholder="Teklif bekleniyor" oninput="updateSupplierRequestTotal()"></td><td><input data-field="note" value="'+esc(item.note||'')+'" placeholder="Örn. aynı partiden"></td><td><button class="proc-remove" type="button" title="Kalemi sil" onclick="this.closest(\'tr\').remove();updateSupplierRequestTotal()">✕</button></td>';
  body.appendChild(row);updateSupplierRequestTotal();
 }
 function supplierRequestCardChanged(select){
@@ -343,7 +343,7 @@ function saveSupplierRequest(){
  if(!supplier){toast('Tedarikçi firma adını yazmalısın.');document.getElementById('req-supplier')?.focus();return}
  if(!items.length||items.some(x=>!x.card||!Number.isInteger(x.qty)||x.qty<1)){toast('Her malzeme satırında stok kartı ve tam sayı plaka adedi bulunmalı.');return}
  if(items.some(x=>x.unitPrice!==null&&(!Number.isFinite(x.unitPrice)||x.unitPrice<0))){toast('Birim fiyatları sıfır veya daha büyük olmalı.');return}
- const nextNo='TR-'+date.replaceAll('-','')+'-'+String((db.requests||[]).length+1).padStart(3,'0');
+ const nextNo='TR-'+date.split('-').join('')+'-'+String((db.requests||[]).length+1).padStart(3,'0');
  const request={id:'REQ'+Date.now(),number:nextNo,supplier,contact:val('req-contact').trim(),date,deliveryDate:val('req-delivery'),note:val('req-note').trim(),items:items.map(x=>({cardId:x.cardId,type:x.card.type,brand:x.card.brand,decor:x.card.decor,thickness:x.card.thickness,size:x.card.size,qty:x.qty,unitPrice:x.unitPrice,note:x.note})),status:'pending',createdAt:new Date().toISOString()};
  if(!Array.isArray(db.requests))db.requests=[];db.requests.push(request);save();renderSupplierRequests();clearSupplierRequestForm();toast(request.number+' tedarik isteği kaydedildi.');
  if(confirm('Tedarik isteği kaydedildi. Bu listedeki malzemeler gerçekten teslim alındı mı?\n\nTamam: Teslim aldım, stoğa işle.\nİptal: Sadece tedarik isteği olarak kalsın.'))receiveSupplierRequest(request.id);
