@@ -172,104 +172,124 @@ body{background:linear-gradient(180deg,#e7edf2 0%,#edf2f6 46%,#e8eef3 100%)}
 .alert-center{margin-top:22px!important}
 @media(max-width:700px){.alert-center{margin-top:16px!important}}
 
-/* Premium finans kartlari — tum mevcut gostergeler korunur */
-.exec-section>.exec-grid{
-  gap:14px!important;
-  margin-top:14px!important;
+
+/* ACANLAR / Finans KPI sistemi — tutarlı kurumsal kart dili */
+.kpi-block{margin-top:24px}
+.kpi-block:first-of-type{margin-top:20px}
+.kpi-block-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:0 1px 11px;padding:0 1px 10px;border-bottom:1px solid #d7e1e8}
+.kpi-head-main{min-width:0}
+.kpi-overline{display:block;margin-bottom:5px;color:#7890a2;font-size:8px;font-weight:850;letter-spacing:1.5px}
+.kpi-title-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px 12px}
+.kpi-title-row h3{margin:0;color:#29465c;font-size:13px;font-weight:800;letter-spacing:-.15px}
+.kpi-title-row p{margin:0;color:#8796a1;font-size:9px;line-height:1.4}
+.kpi-count{flex:none;padding:5px 8px;border:1px solid #dce5eb;border-radius:6px;background:#f8fafb;color:#73899a;font-size:8px;font-weight:800;letter-spacing:.6px}
+.exec-section .kpi-grid{display:grid;gap:12px;margin:0!important}
+.exec-section .kpi-grid-portfolio{grid-template-columns:repeat(4,minmax(0,1fr))}
+.exec-section .kpi-grid-finance{grid-template-columns:repeat(3,minmax(0,1fr))}
+.exec-section .kpi-grid-control{grid-template-columns:repeat(2,minmax(0,1fr))}
+.exec-section .kpi-grid-monthly{grid-template-columns:repeat(3,minmax(0,1fr))}
+.exec-section .kpi-card{
+ position:relative;display:flex;flex-direction:column;justify-content:space-between;
+ min-width:0;min-height:128px;padding:17px 17px 15px!important;
+ overflow:hidden;border:1px solid #dce5eb!important;border-radius:13px!important;
+ background:#fff!important;box-shadow:0 3px 12px rgba(32,57,76,.045)!important;
+ transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
 }
-.exec-section>.exec-grid:first-of-type{margin-top:16px!important}
-.exec-section>.exec-grid .exec-kpi{
-  position:relative;
-  isolation:isolate;
-  min-height:126px;
-  padding:17px 18px 15px!important;
-  border:1px solid rgba(119,145,164,.22)!important;
-  border-radius:16px!important;
-  box-shadow:0 7px 20px rgba(34,59,78,.065),inset 0 1px 0 rgba(255,255,255,.8)!important;
-  transition:transform .18s ease,box-shadow .18s ease;
+.exec-section .kpi-card:before{
+ content:"";position:absolute;left:0;right:0;top:0;bottom:auto;
+ width:auto;height:3px;background:#91a9ba!important;
 }
-.exec-section>.exec-grid .exec-kpi:hover{
-  transform:translateY(-2px);
-  box-shadow:0 12px 25px rgba(34,59,78,.11)!important;
+.exec-section .kpi-card:hover{transform:translateY(-2px);border-color:#c6d5df!important;box-shadow:0 9px 20px rgba(32,57,76,.085)!important}
+.exec-section .kpi-card .k-label{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ min-height:32px;color:#647b8d!important;font-size:10px!important;
+ font-weight:750!important;line-height:1.4;letter-spacing:.05px;
 }
-.exec-section>.exec-grid .k-label{
-  align-items:center;
-  color:#62798b!important;
-  font-size:10px!important;
-  font-weight:750!important;
-  letter-spacing:.15px;
-  line-height:1.4;
+.exec-section .kpi-card .k-icon{
+ flex:none;width:31px!important;height:31px!important;border-radius:9px!important;
+ border:1px solid rgba(89,119,141,.12);background:#f1f5f8!important;
+ color:#52758f!important;box-shadow:none!important;font-size:13px!important;
 }
-.exec-section>.exec-grid .k-icon{
-  width:32px!important;height:32px!important;
-  border-radius:11px!important;
-  border:1px solid rgba(107,135,154,.12);
-  box-shadow:0 3px 9px rgba(34,59,78,.06);
-  font-size:14px!important;
+.exec-section .kpi-card strong{
+ display:block;margin-top:13px!important;color:#253f53!important;
+ font-size:clamp(19px,1.9vw,25px)!important;font-weight:790!important;
+ line-height:1.12;letter-spacing:-.7px!important;overflow-wrap:anywhere;
+ font-variant-numeric:tabular-nums;
 }
-.exec-section>.exec-grid .exec-kpi strong{
-  margin-top:15px!important;
-  font-size:25px!important;
-  letter-spacing:-.8px!important;
-  font-weight:820!important;
+.exec-section .kpi-card small{
+ display:block;margin-top:8px!important;color:#8796a1!important;
+ font-size:9px!important;font-weight:450;line-height:1.45!important;
 }
-.exec-section>.exec-grid .exec-kpi small{
-  margin-top:7px!important;
-  color:#8393a0!important;
-  font-size:9px!important;
-  line-height:1.45!important;
+/* Portföy: durumları renkleriyle ayır, fakat dört kartı aynı sistemde tut */
+.exec-section .portfolio-neutral:before{background:#7897ad!important}
+.exec-section .portfolio-offer:before{background:#c49a58!important}
+.exec-section .portfolio-active:before{background:#6593b3!important}
+.exec-section .portfolio-complete:before{background:#66a184!important}
+.exec-section .portfolio-offer .k-icon{background:#f8f3e9!important;color:#a67d40!important}
+.exec-section .portfolio-active .k-icon{background:#edf4f9!important;color:#527f9f!important}
+.exec-section .portfolio-complete .k-icon{background:#edf5ef!important;color:#52856a!important}
+/* Finans: altı kart aynı ölçüde; yalnızca anlamlı vurgu renkleri farklı */
+.exec-section .finance-volume{background:linear-gradient(145deg,#fff 0%,#f5f8fb 100%)!important}
+.exec-section .finance-volume:before{background:#5c819f!important}
+.exec-section .finance-collected{background:linear-gradient(145deg,#fff 0%,#f3f8f4 100%)!important}
+.exec-section .finance-collected:before{background:#5f9a7a!important}
+.exec-section .finance-receivable{background:linear-gradient(145deg,#fff 0%,#fbf7ef 100%)!important}
+.exec-section .finance-receivable:before{background:#c39a57!important}
+.exec-section .finance-expenses{background:linear-gradient(145deg,#fff 0%,#fbf5f4 100%)!important}
+.exec-section .finance-expenses:before{background:#bd7770!important}
+.exec-section .finance-profit{background:linear-gradient(145deg,#edf6f0 0%,#e5f1e9 100%)!important;border-color:#d0e3d6!important}
+.exec-section .finance-profit:before{background:#4f9774!important}
+.exec-section .finance-profit .k-label,.exec-section .finance-profit strong{color:#28694f!important}
+.exec-section .finance-profit .k-icon{background:#dceee3!important;color:#377b5d!important}
+.exec-section .finance-margin{background:linear-gradient(145deg,#f1f5fa 0%,#eaf0f7 100%)!important;border-color:#d7e2ec!important}
+.exec-section .finance-margin:before{background:#698baa!important}
+.exec-section .finance-margin .k-label,.exec-section .finance-margin strong{color:#315c7a!important}
+.exec-section .finance-margin .k-icon{background:#e0eaf3!important;color:#527a99!important}
+/* Takip kartları */
+.exec-section .control-overdue{background:#fcf7f6!important;border-color:#eddfdd!important}
+.exec-section .control-overdue:before{background:#bd716b!important}
+.exec-section .control-overdue .k-icon{background:#f7eae8!important;color:#a85e58!important}
+.exec-section .control-completed{background:#f5f8fb!important;border-color:#dce6ed!important}
+.exec-section .control-completed:before{background:#759bb7!important}
+/* Dönem kartları: daha sakin, ikincil gösterge katmanı */
+.exec-section .monthly-grid .kpi-card{min-height:116px;padding:14px 15px 13px!important;background:#fff!important}
+.exec-section .monthly-grid .kpi-card:before{height:2px}
+.exec-section .monthly-grid .kpi-card strong{margin-top:10px!important;font-size:21px!important}
+.exec-section .monthly-grid .kpi-card .k-label{font-size:9px!important}
+.exec-section .monthly-grid .kpi-card .k-icon{width:27px!important;height:27px!important;border-radius:8px!important}
+.exec-section .monthly-orders:before{background:#6f91aa!important}
+.exec-section .monthly-collected:before{background:#65977a!important}
+.exec-section .monthly-expenses:before{background:#bd7770!important}
+.exec-section .monthly-duration:before{background:#8b83ad!important}
+.exec-section .monthly-quotes:before{background:#6d91a7!important}
+.exec-section .monthly-quote-value:before{background:#bd9a61!important}
+.kpi-support-panels{margin-top:24px!important}
+@media(max-width:1050px){
+ .exec-section .kpi-grid-portfolio{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .exec-section .kpi-grid-finance{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .exec-section .kpi-grid-monthly{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
-/* Finansın ana göstergeleri */
-.exec-section>.exec-grid .exec-kpi:has(#cx-contracts),
-.exec-section>.exec-grid .exec-kpi:has(#cx-collected),
-.exec-section>.exec-grid .exec-kpi:has(#cx-receivable),
-.exec-section>.exec-grid .exec-kpi:has(#cx-expenses){
-  min-height:140px;
+@media(max-width:650px){
+ .kpi-block{margin-top:20px}
+ .kpi-block-head{align-items:flex-start;gap:8px;padding-bottom:9px}
+ .kpi-title-row{display:block}
+ .kpi-title-row h3{font-size:12px}
+ .kpi-title-row p{margin-top:3px;font-size:8px}
+ .kpi-count{font-size:7px;padding:4px 6px}
+ .exec-section .kpi-grid{gap:9px}
+ .exec-section .kpi-grid-portfolio,.exec-section .kpi-grid-finance,.exec-section .kpi-grid-control,.exec-section .kpi-grid-monthly{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .exec-section .kpi-card{min-height:112px;padding:13px 12px 12px!important;border-radius:11px!important}
+ .exec-section .kpi-card .k-label{font-size:8px!important;min-height:27px;gap:5px}
+ .exec-section .kpi-card .k-icon{width:25px!important;height:25px!important;font-size:11px!important}
+ .exec-section .kpi-card strong{font-size:clamp(17px,4.7vw,21px)!important;margin-top:11px!important;letter-spacing:-.5px!important}
+ .exec-section .kpi-card small{font-size:7.5px!important;margin-top:6px!important}
+ .exec-section .monthly-grid .kpi-card{min-height:104px;padding:11px!important}
+ .exec-section .monthly-grid .kpi-card strong{font-size:clamp(16px,4.3vw,19px)!important}
+ .kpi-support-panels{margin-top:19px!important}
 }
-.exec-section>.exec-grid .exec-kpi:has(#cx-profit){
-  background:linear-gradient(135deg,#1d3b53 0%,#2c5872 100%)!important;
-  border:1px solid #294e68!important;
-  box-shadow:0 11px 25px rgba(29,59,83,.2)!important;
-}
-.exec-section>.exec-grid .exec-kpi:has(#cx-profit):before{background:#8cc8a8!important}
-.exec-section>.exec-grid .exec-kpi:has(#cx-profit) .k-label,
-.exec-section>.exec-grid .exec-kpi:has(#cx-profit) strong,
-.exec-section>.exec-grid .exec-kpi:has(#cx-profit) small{color:#fff!important}
-.exec-section>.exec-grid .exec-kpi:has(#cx-profit) small{color:#c7d9e4!important}
-.exec-section>.exec-grid .exec-kpi:has(#cx-profit) .k-icon{
-  color:#d7f0e1!important;background:rgba(255,255,255,.13)!important;border-color:rgba(255,255,255,.14)
-}
-.exec-section>.exec-grid .exec-kpi:has(#cx-margin){
-  background:linear-gradient(145deg,#edf3f9,#e5eef6)!important;
-  border-color:#cfdeea!important;
-}
-.exec-section>.exec-grid .exec-kpi:has(#cx-margin) strong{color:#315e7e!important}
-/* Aylik performans kartlari daha kompakt ikinci seviye */
-.exec-section>.exec-grid[style*="margin-top"] .exec-kpi{
-  min-height:112px;
-  padding:14px 16px 12px!important;
-  border-radius:14px!important;
-  box-shadow:0 5px 15px rgba(34,59,78,.045)!important;
-}
-.exec-section>.exec-grid[style*="margin-top"] .exec-kpi strong{
-  margin-top:10px!important;font-size:21px!important;
-}
-.exec-section>.exec-grid[style*="margin-top"] .k-icon{
-  width:28px!important;height:28px!important;border-radius:9px!important;
-}
-@media(max-width:900px){
- .exec-section>.exec-grid{gap:11px!important}
- .exec-section>.exec-grid .exec-kpi{min-height:120px}
-}
-@media(max-width:540px){
- .exec-section>.exec-grid{gap:9px!important;margin-top:11px!important}
- .exec-section>.exec-grid .exec-kpi{min-height:112px;padding:13px 12px 11px!important;border-radius:13px!important}
- .exec-section>.exec-grid .k-label{font-size:9px!important}
- .exec-section>.exec-grid .k-icon{width:27px!important;height:27px!important}
- .exec-section>.exec-grid .exec-kpi strong{font-size:19px!important;margin-top:12px!important}
- .exec-section>.exec-grid .exec-kpi small{font-size:8px!important}
- .exec-section>.exec-grid[style*="margin-top"] .exec-kpi{min-height:104px;padding:11px!important}
- .exec-section>.exec-grid[style*="margin-top"] .exec-kpi strong{font-size:17px!important}
+@media(max-width:360px){
+ .exec-section .kpi-card{padding:11px 9px 10px!important}
+ .exec-section .kpi-card strong{font-size:16px!important}
 }
 </style></head><body>
 <div class="wrap" id="dashboard" hidden>
@@ -278,33 +298,77 @@ body{background:linear-gradient(180deg,#e7edf2 0%,#edf2f6 46%,#e8eef3 100%)}
 <section class="exec-section">
  <div class="exec-heading"><div><h2>İş ve finans yönetimi</h2><p>Müşteri Dosyaları'ndan canlı alınan işler, tahsilatlar, giderler ve kârlılık</p></div><span class="tag green" id="client-source-status">Bağlantı bekleniyor</span></div>
 
- <div class="exec-panels">
+
+ <section class="kpi-block kpi-block-portfolio">
+  <div class="kpi-block-head">
+   <div class="kpi-head-main">
+    <span class="kpi-overline">01  /  OPERASYON</span>
+    <div class="kpi-title-row"><h3>İş portföyü</h3><p>Müşteri dosyalarının mevcut durumu ve iş yoğunluğu</p></div>
+   </div>
+   <span class="kpi-count">4 GÖSTERGE</span>
+  </div>
+  <div class="exec-grid kpi-grid kpi-grid-portfolio">
+<article class="exec-kpi kpi-card portfolio-neutral"><div class="k-label">Toplam müşteri dosyası <span class="k-icon">▣</span></div><strong id="cx-total">—</strong><small>Silinmemiş müşteri kayıtları</small></article>
+<article class="exec-kpi kpi-card portfolio-offer amber"><div class="k-label">Teklif aşamasındaki işler <span class="k-icon">▤</span></div><strong id="cx-offers">—</strong><small>Müşteri dosyası durumu: Teklif</small></article>
+<article class="exec-kpi kpi-card portfolio-active"><div class="k-label">Devam eden üretim <span class="k-icon">⚙</span></div><strong id="cx-active">—</strong><small>Üretimde olan işler</small></article>
+<article class="exec-kpi kpi-card portfolio-complete green"><div class="k-label">Tamamlanan işler <span class="k-icon">✓</span></div><strong id="cx-completed">—</strong><small>Tamamlandı durumundaki dosyalar</small></article>
+  </div>
+ </section>
+
+ <section class="kpi-block kpi-block-finance">
+  <div class="kpi-block-head">
+   <div class="kpi-head-main">
+    <span class="kpi-overline">02  /  FİNANS</span>
+    <div class="kpi-title-row"><h3>Finansal durum</h3><p>İş hacmi, tahsilat, açık alacaklar ve kârlılık</p></div>
+   </div>
+   <span class="kpi-count">6 GÖSTERGE</span>
+  </div>
+  <div class="exec-grid kpi-grid kpi-grid-finance">
+<article class="exec-kpi kpi-card finance-volume"><div class="k-label">Toplam iş bedeli <span class="k-icon">₺</span></div><strong id="cx-contracts">—</strong><small>Teklif aşaması hariç, üretim + tamamlanan</small></article>
+<article class="exec-kpi kpi-card finance-collected green"><div class="k-label">Toplam tahsilat <span class="k-icon">↙</span></div><strong id="cx-collected">—</strong><small>Dosyalara kaydedilmiş ödemeler</small></article>
+<article class="exec-kpi kpi-card finance-receivable amber"><div class="k-label">Toplam kalan alacak <span class="k-icon">◷</span></div><strong id="cx-receivable">—</strong><small>İş bedeli − kayıtlı tahsilatlar</small></article>
+<article class="exec-kpi kpi-card finance-expenses red"><div class="k-label">Toplam kayıtlı gider <span class="k-icon">↗</span></div><strong id="cx-expenses">—</strong><small>Dosyalara girilmiş harcamalar</small></article>
+<article class="exec-kpi kpi-card finance-profit green"><div class="k-label">Hesaplanan brüt kâr <span class="k-icon">✦</span></div><strong id="cx-profit">—</strong><small>İş bedeli − kayıtlı giderler</small></article>
+<article class="exec-kpi kpi-card finance-margin"><div class="k-label">Kâr marjı <span class="k-icon">%</span></div><strong id="cx-margin">—</strong><small>Hesaplanan kâr / iş bedeli</small></article>
+  </div>
+ </section>
+
+ <section class="kpi-block kpi-block-control">
+  <div class="kpi-block-head">
+   <div class="kpi-head-main">
+    <span class="kpi-overline">03  /  TAKİP</span>
+    <div class="kpi-title-row"><h3>Kontrol göstergeleri</h3><p>Vadesi geçen tutarlar ve tamamlanan işler</p></div>
+   </div>
+   <span class="kpi-count">2 GÖSTERGE</span>
+  </div>
+  <div class="exec-grid kpi-grid kpi-grid-control">
+<article class="exec-kpi kpi-card control-overdue amber"><div class="k-label">Vadesi geçmiş alacak <span class="k-icon">!</span></div><strong id="cx-overdue">—</strong><small>Ödeme planında vadesi geçmiş, açık kalan tutar</small></article>
+<article class="exec-kpi kpi-card control-completed"><div class="k-label">Bu ay tamamlanan <span class="k-icon">▦</span></div><strong id="cx-month-done">—</strong><small>Tamamlanma tarihine göre</small></article>
+  </div>
+ </section>
+
+ <section class="kpi-block kpi-block-monthly">
+  <div class="kpi-block-head">
+   <div class="kpi-head-main">
+    <span class="kpi-overline">04  /  DÖNEMSEL PERFORMANS</span>
+    <div class="kpi-title-row"><h3>Aylık performans</h3><p>Bu ayın sipariş, tahsilat, gider ve teklif hareketleri</p></div>
+   </div>
+   <span class="kpi-count">6 GÖSTERGE</span>
+  </div>
+  <div class="exec-grid kpi-grid kpi-grid-monthly">
+<article class="exec-kpi kpi-card monthly-orders"><div class="k-label">Bu ay alınan sipariş <span class="k-icon">↗</span></div><strong id="cx-month-orders">—</strong><small>İş başlangıç tarihine göre · teklif hariç</small></article>
+<article class="exec-kpi kpi-card monthly-collected green"><div class="k-label">Bu ay tahsilat <span class="k-icon">₺</span></div><strong id="cx-month-collected">—</strong><small>Tarihi kayıtlı ödeme hareketleri</small></article>
+<article class="exec-kpi kpi-card monthly-expenses red"><div class="k-label">Bu ay gider <span class="k-icon">↘</span></div><strong id="cx-month-expenses">—</strong><small>Tarihi kayıtlı gider hareketleri</small></article>
+<article class="exec-kpi kpi-card monthly-duration"><div class="k-label">Ortalama teslim süresi <span class="k-icon">◷</span></div><strong id="cx-average-days">—</strong><small>Tamamlanan işlerde gün · kayıtlı tarihler</small></article>
+<article class="exec-kpi kpi-card monthly-quotes"><div class="k-label">Bu ay hazırlanan teklifler <span class="k-icon">▧</span></div><strong id="month-quotes">—</strong><small id="quote-hint">Teklif uygulamalarından</small></article>
+<article class="exec-kpi kpi-card monthly-quote-value amber"><div class="k-label">Bu ay teklif tutarı <span class="k-icon">₺</span></div><strong id="quote-total">—</strong><small>Bu ay oluşturulan teklifler · sipariş cirosu değildir</small></article>
+  </div>
+ </section>
+
+ <div class="exec-panels kpi-support-panels">
   <div class="exec-panel"><h3>İşlerin aşamalara göre dağılımı</h3><p>Teklif, üretim ve tamamlanma durumu</p><div class="state-bars" id="cx-state-bars"><div class="exec-loading">Müşteri dosyaları bekleniyor…</div></div></div>
   <div class="exec-panel"><h3>Son 6 ayın iş bedeli</h3><p>Üretimde ve tamamlanmış işlerin geliş ayına göre toplamı</p><div class="trend-chart" id="cx-trend"><div class="exec-loading">Veri bekleniyor…</div></div></div>
  </div>
- <div class="exec-grid">
-  <article class="exec-kpi"><div class="k-label">Toplam müşteri dosyası <span class="k-icon">▣</span></div><strong id="cx-total">—</strong><small>Silinmemiş müşteri kayıtları</small></article>
-  <article class="exec-kpi amber"><div class="k-label">Teklif aşamasındaki işler <span class="k-icon">▤</span></div><strong id="cx-offers">—</strong><small>Müşteri dosyası durumu: Teklif</small></article>
-  <article class="exec-kpi"><div class="k-label">Devam eden üretim <span class="k-icon">⚙</span></div><strong id="cx-active">—</strong><small>Üretimde olan işler</small></article>
-  <article class="exec-kpi green"><div class="k-label">Tamamlanan işler <span class="k-icon">✓</span></div><strong id="cx-completed">—</strong><small>Tamamlandı durumundaki dosyalar</small></article>
-  <article class="exec-kpi"><div class="k-label">Toplam iş bedeli <span class="k-icon">₺</span></div><strong id="cx-contracts">—</strong><small>Teklif aşaması hariç, üretim + tamamlanan</small></article>
-  <article class="exec-kpi green"><div class="k-label">Toplam tahsilat <span class="k-icon">↙</span></div><strong id="cx-collected">—</strong><small>Dosyalara kaydedilmiş ödemeler</small></article>
-  <article class="exec-kpi amber"><div class="k-label">Toplam kalan alacak <span class="k-icon">◷</span></div><strong id="cx-receivable">—</strong><small>İş bedeli − kayıtlı tahsilatlar</small></article>
-  <article class="exec-kpi red"><div class="k-label">Toplam kayıtlı gider <span class="k-icon">↗</span></div><strong id="cx-expenses">—</strong><small>Dosyalara girilmiş harcamalar</small></article>
-  <article class="exec-kpi green"><div class="k-label">Hesaplanan brüt kâr <span class="k-icon">✦</span></div><strong id="cx-profit">—</strong><small>İş bedeli − kayıtlı giderler</small></article>
-  <article class="exec-kpi"><div class="k-label">Kâr marjı <span class="k-icon">%</span></div><strong id="cx-margin">—</strong><small>Hesaplanan kâr / iş bedeli</small></article>
-  <article class="exec-kpi amber"><div class="k-label">Vadesi geçmiş alacak <span class="k-icon">!</span></div><strong id="cx-overdue">—</strong><small>Ödeme planında vadesi geçmiş, açık kalan tutar</small></article>
-  <article class="exec-kpi"><div class="k-label">Bu ay tamamlanan <span class="k-icon">▦</span></div><strong id="cx-month-done">—</strong><small>Tamamlanma tarihine göre</small></article>
- </div>
- <div class="exec-grid" style="margin-top:12px">
-  <article class="exec-kpi"><div class="k-label">Bu ay alınan sipariş <span class="k-icon">↗</span></div><strong id="cx-month-orders">—</strong><small>İş başlangıç tarihine göre · teklif hariç</small></article>
-  <article class="exec-kpi green"><div class="k-label">Bu ay tahsilat <span class="k-icon">₺</span></div><strong id="cx-month-collected">—</strong><small>Tarihi kayıtlı ödeme hareketleri</small></article>
-  <article class="exec-kpi red"><div class="k-label">Bu ay gider <span class="k-icon">↘</span></div><strong id="cx-month-expenses">—</strong><small>Tarihi kayıtlı gider hareketleri</small></article>
-  <article class="exec-kpi"><div class="k-label">Ortalama teslim süresi <span class="k-icon">◷</span></div><strong id="cx-average-days">—</strong><small>Tamamlanan işlerde gün · kayıtlı tarihler</small></article>
-  <article class="exec-kpi"><div class="k-label">Bu ay hazırlanan teklifler <span class="k-icon">▧</span></div><strong id="month-quotes">—</strong><small id="quote-hint">Teklif uygulamalarından</small></article>
-  <article class="exec-kpi amber"><div class="k-label">Bu ay teklif tutarı <span class="k-icon">₺</span></div><strong id="quote-total">—</strong><small>Bu ay oluşturulan teklifler · sipariş cirosu değildir</small></article>
- </div>
-
  <section class="alert-center" aria-live="polite">
  <div class="alert-head"><div><span class="alert-eyebrow">AKILLI TAKİP</span><h2>Akıllı Uyarı Merkezi</h2><p>Atölyede dikkat gerektiren konular tek ekranda</p></div><span class="alert-total" id="alert-total">Kontrol ediliyor</span></div>
  <div class="alert-summary" id="alert-summary"><div class="alert-stat"><span>🔴 Kritik</span><b id="alert-critical-count">—</b></div><div class="alert-stat"><span>🟠 Yaklaşan / geciken</span><b id="alert-warning-count">—</b></div><div class="alert-stat"><span>🟢 Canlı kaynak</span><b id="alert-info-count">—</b></div></div>
