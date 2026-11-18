@@ -300,7 +300,7 @@ function supplierRequestItems(){
   const rawPrice=row.querySelector('[data-field="price"]')?.value??'';
   const price=String(rawPrice).trim()===''?null:Number(rawPrice);
   return {cardId,card,qty,unitPrice:price,note:row.querySelector('[data-field="note"]')?.value?.trim()||''};
- }).filter(x=>x.qty>0||x.note);
+ }).filter(x=>x.qty!==0||x.note);
 }
 function addSupplierRequestRow(item={}){
  const body=document.getElementById('supplier-request-items');if(!body)return;
@@ -358,7 +358,7 @@ function receiveSupplierRequest(id){
   if(price===null||price===undefined||!Number.isFinite(Number(price))){
    const fallback=Number(card.defaultUnitPrice);
    if(fallback>0)price=fallback;
-   else {const entered=prompt(cardName(card)+' için gerçekleşen birim alış fiyatını gir (TL):','');if(entered===null)return;price=Number(entered)}
+   else {const entered=prompt(cardName(card)+' için gerçekleşen birim alış fiyatını gir (TL):','');if(entered===null)return;if(!entered.trim()){toast('Stoğa aktarmak için birim alış fiyatını girmelisin.');return}price=Number(entered.trim().replace(',','.'))}
   }else price=Number(price);
   if(!Number.isFinite(price)||price<0){toast('Birim fiyatı geçersiz. '+cardName(card)+' satırını kontrol et.');return}
   if(!Number.isInteger(Number(item.qty))||Number(item.qty)<1){toast('Plaka adedi geçersiz.');return}
