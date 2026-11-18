@@ -44,6 +44,11 @@
 <section class="intro"><div><div class="eyebrow">İŞLETME ÖZETİ · CANLI VERİ</div><h1>Günaydın, Atölye 👋</h1><p>İşletmenin stok, teklif ve üretim görünümü tek ekranda.</p></div><div class="date" id="today"><span class="date-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg></span><span class="date-copy"><span class="date-weekday" id="today-weekday"></span><span class="date-main" id="today-main"></span></span></div></section>
 <section class="exec-section">
  <div class="exec-heading"><div><h2>İş ve finans yönetimi</h2><p>Müşteri Dosyaları'ndan canlı alınan işler, tahsilatlar, giderler ve kârlılık</p></div><span class="tag green" id="client-source-status">Bağlantı bekleniyor</span></div>
+
+ <div class="exec-panels">
+  <div class="exec-panel"><h3>İşlerin aşamalara göre dağılımı</h3><p>Teklif, üretim ve tamamlanma durumu</p><div class="state-bars" id="cx-state-bars"><div class="exec-loading">Müşteri dosyaları bekleniyor…</div></div></div>
+  <div class="exec-panel"><h3>Son 6 ayın iş bedeli</h3><p>Üretimde ve tamamlanmış işlerin geliş ayına göre toplamı</p><div class="trend-chart" id="cx-trend"><div class="exec-loading">Veri bekleniyor…</div></div></div>
+ </div>
  <div class="exec-grid">
   <article class="exec-kpi"><div class="k-label">Toplam müşteri dosyası <span class="k-icon">▣</span></div><strong id="cx-total">—</strong><small>Silinmemiş müşteri kayıtları</small></article>
   <article class="exec-kpi amber"><div class="k-label">Teklif aşamasındaki işler <span class="k-icon">▤</span></div><strong id="cx-offers">—</strong><small>Müşteri dosyası durumu: Teklif</small></article>
@@ -66,10 +71,7 @@
   <article class="exec-kpi"><div class="k-label">Bu ay hazırlanan teklifler <span class="k-icon">▧</span></div><strong id="month-quotes">—</strong><small id="quote-hint">Teklif uygulamalarından</small></article>
   <article class="exec-kpi amber"><div class="k-label">Bu ay teklif tutarı <span class="k-icon">₺</span></div><strong id="quote-total">—</strong><small>Bu ay oluşturulan teklifler · sipariş cirosu değildir</small></article>
  </div>
- <div class="exec-panels">
-  <div class="exec-panel"><h3>İşlerin aşamalara göre dağılımı</h3><p>Teklif, üretim ve tamamlanma durumu</p><div class="state-bars" id="cx-state-bars"><div class="exec-loading">Müşteri dosyaları bekleniyor…</div></div></div>
-  <div class="exec-panel"><h3>Son 6 ayın iş bedeli</h3><p>Üretimde ve tamamlanmış işlerin geliş ayına göre toplamı</p><div class="trend-chart" id="cx-trend"><div class="exec-loading">Veri bekleniyor…</div></div></div>
- </div>
+
  <div class="exec-panels">
   <div class="exec-panel"><h3>Takip gerektiren işler</h3><p>Teslim tarihi geçmiş veya yaklaşan üretim işleri</p><div class="rows" id="cx-due-jobs"><div class="exec-loading">Veri bekleniyor…</div></div></div>
   <div class="exec-panel"><h3>İş bazında kayıtlı kâr</h3><p>İş bedeli − dosyaya girilmiş gider · en yüksek 6 iş</p><div class="rows" id="cx-profit-jobs"><div class="exec-loading">Veri bekleniyor…</div></div></div>
