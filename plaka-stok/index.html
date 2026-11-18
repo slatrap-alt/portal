@@ -102,6 +102,24 @@ tbody tr:hover td{background:#f0f7fd}
 .stats .stat.panel-total .stat-value{font-size:30px;color:#15734b!important}
 .stats .stat.panel-total{border-top-color:#20966b;background:linear-gradient(145deg,#e4f7ed 0%,#fff 78%)}
 @media(max-width:680px){.stock-count{min-width:76px;padding:6px 9px;font-size:15px}.stock-count small{font-size:8px}}
+
+/* Mobil üst çubuk: bulut bağlantısı ve hesap butonunu kompaktlaştır */
+@media(max-width:680px){
+ .top{gap:8px;overflow:visible}
+ .crumb{flex:1;min-width:0;font-size:10px;line-height:1.25}
+ .topright{flex:0 0 auto;gap:5px;min-width:0}
+ .portal-back{width:34px;height:34px;justify-content:center;padding:0;border-radius:10px;flex:0 0 34px}
+ .portal-back span:first-child{font-size:18px}
+ .mode{display:inline-flex;align-items:center;justify-content:center;max-width:76px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:6px 7px;font-size:8px;line-height:1.15;border-radius:9px;letter-spacing:0}
+ #cloud-account{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:0;min-height:36px;padding:8px 10px;border-radius:11px;font-size:10px;line-height:1;white-space:nowrap;word-break:keep-all;box-shadow:0 3px 9px #245d8820}
+ .avatar{width:31px;height:31px;flex:0 0 31px;font-size:11px}
+}
+@media(max-width:380px){
+ .crumb{font-size:9px}
+ .mode{max-width:60px;padding:5px}
+ #cloud-account{padding:8px;font-size:9px}
+ .topright{gap:4px}
+}
 </style>
 </head>
 <body>
@@ -209,7 +227,7 @@ renderAll();
 // Firebase cloud sync: same project and email/password account as the cutting app.
 let stockApp=null,stockAuth=null,stockFS=null,stockUser=null,stockStops=[],stockCloudReady=false,stockApplyingRemote=false;
 const STOCK_COLLECTIONS={cards:'acanlar_stock_cards',lots:'acanlar_stock_lots',moves:'acanlar_stock_movements',meta:'acanlar_stock_meta'};
-function stockSetStatus(message,bad=false){const el=document.getElementById('cloud-status');if(el){el.textContent=message;const connected=message.includes('Firebase bağlı')||message.includes('Veriler eşitlendi');el.style.background=bad?'#fff0ef':connected?'#e8f6ef':'#fff8e9';el.style.color=bad?'#b54d4d':connected?'#23754f':'#936a22'}const b=document.getElementById('cloud-account');if(b)b.textContent=stockUser?'☁ Hesaptan çıkış':'☁ Hesaba bağlan'}
+function stockSetStatus(message,bad=false){const el=document.getElementById('cloud-status');if(el){el.textContent=message;const connected=message.includes('Firebase bağlı')||message.includes('Veriler eşitlendi');el.style.background=bad?'#fff0ef':connected?'#e8f6ef':'#fff8e9';el.style.color=bad?'#b54d4d':connected?'#23754f':'#936a22'}const b=document.getElementById('cloud-account');if(b){b.textContent=stockUser?'☁ Çıkış yap':'☁ Bağlan';b.title=stockUser?'Atölye hesabından çıkış yap':'Bulut hesabına bağlan'}}
 function stockAuthOpen(){document.getElementById('stock-auth-modal').classList.add('open');document.getElementById('stock-auth-error').textContent=''}
 function stockAuthClose(){document.getElementById('stock-auth-modal').classList.remove('open')}
 function stockAccountAction(){if(stockUser){if(confirm('Atölye hesabından çıkış yapmak istiyor musun?'))stockAuth.signOut()}else stockAuthOpen()}
