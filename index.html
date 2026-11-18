@@ -50,6 +50,7 @@ body:after{background:linear-gradient(140deg,transparent 0 8%,#e4ded443 8% 12%,t
 <li><a class="app" href="https://slatrap-alt.github.io/610/" data-app="kesimOptimizasyonu" aria-label="Kesim Optimizasyonu"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="5" width="40" height="38" rx="1.5"/><path d="M23 5v38M4 25h19m5-20v38m0-14h16"/><path class="sage-line" d="M23 5v38m5-18h16" stroke-dasharray="3 3"/><path d="M4 25h19"/></svg><span class="app-name">Kesim Optimizasyonu</span></a></li>
 <li><a class="app" href="https://slatrap-alt.github.io/index.html/" data-app="cizimProgrami" aria-label="Çizim Programı"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M6 3h36v42H6ZM18 3v42M30 3v42m0-15h12m-12 7h12M14 21v7m8-7v7m12-7v7"/></svg><span class="app-name">Çizim Programı</span></a></li>
 <li><a class="app" href="https://slatrap-alt.github.io/cnc/" data-app="cncCamCad" aria-label="CNC CAM / CAD"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path class="sage-fill" d="M14 3h20v9H14Z"/><path d="M18 12v8h12v-8m-10 8v5h8v-5m-6 5v11l2 3 2-3V25m-4 6 4-3m-4 8 4-3M4 44h40M20 41l4 3 4-3"/><path class="sage-line" d="m34 33 1-1m4 5 1 1m-8 1h1m7-10 1-1m-4-4v1m6 14h1"/></svg><span class="app-name">CNC CAM / CAD</span></a></li>
+<li><a class="app" href="https://slatrap-alt.github.io/portal/plaka-stok/" data-app="plakaStok" aria-label="Plaka Stok Yönetimi"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M7 8h34v32H7zM14 15h20M14 22h20M14 29h12"/><path class="sage-line" d="M31 29h4m-2-2v4"/></svg><span class="app-name">Plaka Stok Yönetimi</span></a></li>
 </ul>
 </main>
 <footer class="copyright">© 2026 Mesut ACAN</footer>
@@ -64,7 +65,8 @@ const PROGRAM_LINKLERI = {
   manuelTeklif: 'https://slatrap-alt.github.io/acanlar-teklif/?v=1.6-green',
   kesimOptimizasyonu: 'https://slatrap-alt.github.io/610/',
   cizimProgrami: 'https://slatrap-alt.github.io/index.html/',
-  cncCamCad: 'https://slatrap-alt.github.io/cnc/'
+  cncCamCad: 'https://slatrap-alt.github.io/cnc/',
+  plakaStok: 'https://slatrap-alt.github.io/portal/plaka-stok/'
 };
 let noticeTimer;
 function supportedLink(value){try{const url=new URL(value);return url.protocol==='https:'||url.protocol==='http:'}catch{return false}}
