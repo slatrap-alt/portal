@@ -10,6 +10,8 @@
 @media(max-width:980px){.shell{grid-template-columns:205px 1fr}.side{padding:20px 12px}.content{padding:24px 22px}.top{padding:0 22px}.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
 @media(max-width:680px){.shell{display:block}.side{position:fixed;z-index:10;left:0;right:0;bottom:0;height:66px;padding:6px 8px;display:block;border-top:1px solid #ffffff22}.brand,.nav-label,.side-foot{display:none}.nav{height:100%;display:flex;justify-content:space-around;gap:2px}.nav button{flex:1;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:5px 2px;font-size:9px;text-align:center;border-radius:8px}.nav .ico{font-size:17px;width:auto}.top{height:58px;padding:0 15px}.content{padding:20px 14px 88px}.pagehead{display:block}.pagehead h1{font-size:23px}.actions{margin-top:13px}.stats{gap:9px}.stat{padding:13px}.stat-value{font-size:22px}.stat-icon{right:11px;top:11px}.panel{padding:14px;border-radius:12px}.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}.mode{font-size:9px}.topright{gap:7px}.tablewrap{margin:0 -4px}.barrow{grid-template-columns:75px 1fr 30px}}
 
+.portal-back{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:#285b83;background:linear-gradient(135deg,#f0f6fc,#e6f0f9);border-color:#d5e3ef;font-weight:700}.portal-back span:first-child{font-size:17px;line-height:1}.portal-back:hover{background:#dcebf7;border-color:#b9d1e5;transform:translateY(-1px)}
+@media(max-width:680px){.portal-back{padding:7px 9px;gap:4px}.portal-back span:last-child{display:none}.topright{gap:6px}}
 /* Acanlar color refinement */
 :root{--blue:#3979b8;--green:#23845c;--red:#c65a5a;--amber:#bd852e;--purple:#7965b5;--cyan:#328b9a;--shadow:0 10px 30px #1b35500d}
 body{background:radial-gradient(ellipse at 88% 0%,#e8f1fb 0,transparent 34%),var(--bg)}
@@ -60,7 +62,7 @@ tbody tr:hover td{background:#f7fafd}
  <div class="side-foot">ACANLAR • STOK MODÜLÜ<br>Arayüz önizlemesi · V1.0</div>
 </aside>
 <main class="main">
- <header class="top"><div class="crumb">Acanlar Portal <span style="color:#b6c1cc">/</span> <b id="crumb">Genel Bakış</b></div><div class="topright"><span class="mode" id="cloud-status">BULUT BAĞLANTISI KONTROL EDİLİYOR</span><button class="btn soft" id="cloud-account" onclick="stockAccountAction()">☁ Hesaba bağlan</button><span class="avatar">MA</span></div></header>
+ <header class="top"><div class="crumb">Acanlar Portal <span style="color:#b6c1cc">/</span> <b id="crumb">Genel Bakış</b></div><div class="topright"><a class="btn portal-back" href="../" aria-label="Acanlar Portal ana sayfasına dön"><span aria-hidden="true">⌂</span><span>Portal</span></a><span class="mode" id="cloud-status">BULUT BAĞLANTISI KONTROL EDİLİYOR</span><button class="btn soft" id="cloud-account" onclick="stockAccountAction()">☁ Hesaba bağlan</button><span class="avatar">MA</span></div></header>
  <div class="content">
   <section class="view active" id="view-dashboard">
    <div class="pagehead"><div><div class="eyebrow">DEPO KONTROL MERKEZİ</div><h1>Plaka Stok Yönetimi</h1><p class="sub">Malzemelerini, alış partilerini ve stok hareketlerini tek yerden yönet.</p></div><div class="actions"><button class="btn" onclick="openModal('issue')">− Stok Çıkışı</button><button class="btn primary" onclick="openModal('entry')">＋ Stok Girişi</button></div></div>
