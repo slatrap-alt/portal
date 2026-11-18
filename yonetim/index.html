@@ -50,6 +50,8 @@ window.acanlarLogin=async function(e){
   const credential=await a.auth().signInWithEmailAndPassword($('email').value.trim(),$('password').value);
   err.textContent='Giriş başarılı, panel açılıyor…';
   connect(credential.user);
+  $('login-screen').hidden=true;$('login-screen').style.display='none';
+  $('dashboard').hidden=false;$('dashboard').style.display='block';
  }catch(ex){
   const m={'auth/invalid-email':'E-posta adresi geçersiz.','auth/user-not-found':'Bu e-posta ile hesap bulunamadı.','auth/wrong-password':'Şifre hatalı.','auth/invalid-credential':'E-posta veya şifre hatalı.','auth/too-many-requests':'Çok fazla deneme yapıldı; biraz bekle.','auth/network-request-failed':'İnternet bağlantısı kurulamadı.'};
   err.textContent=m[ex.code]||('Giriş hatası: '+(ex.message||ex.code||'Bilinmeyen hata'));
@@ -76,8 +78,8 @@ function render(){
  $('critical-list').innerHTML=sourceState.stock?(critical.length?critical.slice(0,8).map(c=>{const n=stockLots.filter(l=>l.cardId===c.id).reduce((a,l)=>a+num(l.remaining),0);return '<div class="row"><span><b>'+String(c.type||'Malzeme')+' · '+String(c.decor||'')+'</b><small>'+String(c.brand||'')+' · '+String(c.size||'')+'</small></span><span class="tag '+(n<=0?'red':'amber')+'">'+n+' / min '+num(c.min)+'</span></div>'}).join(''):'<div class="empty">Kritik seviyede malzeme bulunmuyor.</div>'):'<div class="empty">Stok kaynağı henüz bağlanmadı.</div>';
 }
 function stopAll(){stops.forEach(s=>{try{s()}catch(e){}});stops=[];sourceState={stock:false,cut:false,pricing:false,manual:false}}
-function connect(u){stopAll();user=u;if(!u){$('dashboard').hidden=true;$('login-screen').hidden=false;return}
- $('login-screen').hidden=true;$('dashboard').hidden=false;
+function connect(u){stopAll();user=u;if(!u){$('dashboard').hidden=true;$('dashboard').style.display='none';$('login-screen').hidden=false;$('login-screen').style.display='grid';return}
+ $('login-screen').hidden=true;$('login-screen').style.display='none';$('dashboard').hidden=false;$('dashboard').style.display='block';
  const uid=u.uid;
  function listen(ref,handler,key){const stop=ref.onSnapshot(snap=>{handler(snap);setSource(key,true)},err=>{console.error(key,err);setSource(key,false)});stops.push(stop)}
  listen(db.collection('acanlar_stock_cards').doc(uid),snap=>{stockCards=snap.exists&&Array.isArray(snap.data().items)?snap.data().items:[];render()},'stock');
