@@ -46,6 +46,52 @@ tbody tr:hover td{background:#f7fafd}
 .mode{letter-spacing:.25px}
 @media(max-width:680px){.stat{border-top-width:3px}.content{background:transparent}.nav button.active{box-shadow:inset 0 2px #72b6e8}}
 
+
+/* Acanlar bold color system v2 */
+:root{
+ --blue:#287fc1;--green:#20966b;--purple:#8065c7;--amber:#d18a24;
+ --cyan:#238fa3;--coral:#d66b55;--pink:#bd6596;
+}
+.stats .stat{
+ border:1px solid transparent;
+ border-top:4px solid var(--accent);
+ background:linear-gradient(145deg,var(--tint) 0%,#fff 78%);
+ box-shadow:0 9px 24px color-mix(in srgb,var(--accent) 10%,transparent);
+}
+.stats .stat:nth-child(1){--accent:#3288ce;--tint:#e6f3ff;border-color:#cfe7fb}
+.stats .stat:nth-child(2){--accent:#22966b;--tint:#e4f7ed;border-color:#ccebd9}
+.stats .stat:nth-child(3){--accent:#8065c7;--tint:#f0ebff;border-color:#ded5fb}
+.stats .stat:nth-child(4){--accent:#d18a24;--tint:#fff3dc;border-color:#f5e1b9}
+.stats .stat:after{width:104px;height:104px;right:-28px;top:-35px;background:var(--accent);opacity:.10}
+.stats .stat-icon{right:17px;top:17px;width:35px;height:35px;display:grid;place-items:center;background:var(--accent)!important;color:#fff!important;border-radius:11px!important;padding:0!important;box-shadow:0 4px 10px color-mix(in srgb,var(--accent) 25%,transparent)}
+.stats .stat-value{color:var(--accent)!important;font-size:28px}
+.panel{border-color:#e0e8f0;background:linear-gradient(155deg,#fff 0%,#fbfdff 100%);box-shadow:0 9px 26px #1836530c}
+.panelhead{padding-bottom:11px;border-bottom:1px solid #edf1f6}
+.panelhead h2{font-weight:750}
+.grid2>.panel:first-child .panelhead h2:before{content:"";display:inline-block;width:4px;height:16px;border-radius:4px;background:#3288ce;margin-right:9px;vertical-align:-3px}
+.grid2>.panel:last-child .panelhead h2:before{content:"";display:inline-block;width:4px;height:16px;border-radius:4px;background:#8065c7;margin-right:9px;vertical-align:-3px}
+.quick button{border-color:transparent;background:linear-gradient(110deg,var(--quick-bg),#fff 90%);box-shadow:inset 3px 0 var(--quick)}
+.quick button:nth-child(1){--quick:#8065c7;--quick-bg:#f2efff}
+.quick button:nth-child(2){--quick:#20966b;--quick-bg:#eaf8f0}
+.quick button:nth-child(3){--quick:#d66b55;--quick-bg:#fff0eb}
+.quick button i{background:var(--quick)!important;color:#fff!important;box-shadow:0 3px 8px color-mix(in srgb,var(--quick) 22%,transparent)}
+.quick button b{color:#203b54}
+.quick button:hover{border-color:var(--quick);background:var(--quick-bg)}
+.pill.green{background:#dff5e8;color:#16764f}
+.pill.red{background:#ffe5e2;color:#b83e38}
+.pill.amber{background:#fff0d2;color:#9b6512}
+.pill.blue{background:#e3f1ff;color:#286da5}
+.mat .swatch{box-shadow:0 2px 6px #1b355018;border:2px solid #fff;outline:1px solid #dce5ed}
+tbody tr:hover td{background:#f0f7fd}
+.btn.soft{background:linear-gradient(135deg,#e8f3fc,#dcecf9);color:#245f8e;border-color:#c8ddec}
+.mode{border-color:#f0d8a8;background:linear-gradient(120deg,#fff3d9,#fff9ed)}
+@media(max-width:680px){
+ .stats .stat{padding:14px 12px}
+ .stats .stat-value{font-size:24px}
+ .stats .stat-icon{right:10px;top:10px;width:30px;height:30px}
+ .panelhead{padding-bottom:9px}
+}
+
 </style>
 </head>
 <body>
