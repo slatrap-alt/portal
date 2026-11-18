@@ -219,7 +219,7 @@ body{background:linear-gradient(180deg,#e7edf2 0%,#edf2f6 46%,#e8eef3 100%)}
 </div>
 <section class="alert-center" aria-live="polite">
  <div class="alert-head"><div><span class="alert-eyebrow">AKILLI TAKİP</span><h2>Akıllı Uyarı Merkezi</h2><p>Atölyede dikkat gerektiren konular tek ekranda</p></div><span class="alert-total" id="alert-total">Kontrol ediliyor</span></div>
- <div class="alert-summary" id="alert-summary"><div class="alert-stat"><span>🔴 Kritik</span><b id="alert-critical-count">—</b></div><div class="alert-stat"><span>🟠 Yaklaşan / geciken</span><b id="alert-warning-count">—</b></div><div class="alert-stat"><span>🟡 Takip</span><b id="alert-info-count">—</b></div></div>
+ <div class="alert-summary" id="alert-summary"><div class="alert-stat"><span>🔴 Kritik</span><b id="alert-critical-count">—</b></div><div class="alert-stat"><span>🟠 Yaklaşan / geciken</span><b id="alert-warning-count">—</b></div><div class="alert-stat"><span>🟢 Canlı kaynak</span><b id="alert-info-count">—</b></div></div>
  <div class="alert-list" id="alert-list"><div class="empty">Veriler bağlandığında uyarılar burada görünecek.</div></div>
  <div class="alert-foot">Canlı verilerden otomatik oluşturulur · Kayıtlarınız değiştirilmez</div>
 </section>
@@ -400,7 +400,7 @@ function renderAlerts(){
  if(sourceState.clients){for(const f of customerFiles.filter(x=>!x.deleted&&(x.state==='Üretimde'||x.state==='Tamamlandı'))){let paid=(Array.isArray(f.payments)?f.payments:[]).reduce((a,p)=>a+Math.max(0,num(p.amount)),0);const plans=[...(Array.isArray(f.paymentPlan)?f.paymentPlan:[])].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));for(const p of plans){const amount=Math.max(0,num(p.amount)),covered=Math.min(paid,amount);paid-=covered;const remaining=amount-covered,d=parseAlertDate(p.date);if(remaining>0&&d&&dayKey(d)<todayKey){alerts.push({level:'critical',kind:'ALACAK',title:f.name||'İsimsiz müşteri',detail:'Vadesi geçmiş '+money(remaining)+' · '+d.toLocaleDateString('tr-TR'),rank:0})}}}}
  if(sourceState.tasks){for(const t of workTasks.filter(x=>!x.deleted&&!x.done&&!x.clientOnly&&!x.calendarManaged&&String(x.title||'').trim())){if(t.status==='waiting')continue;const d=parseAlertDate(t.due);if(d&&dayKey(d)<todayKey)alerts.push({level:'warning',kind:'İŞ LİSTESİ',title:t.title,detail:'Tamamlanmamış · Tarih: '+d.toLocaleDateString('tr-TR'),rank:2})}}
  alerts.sort((a,b)=>a.rank-b.rank||a.title.localeCompare(b.title,'tr'));
- const critical=alerts.filter(x=>x.level==='critical').length,warning=alerts.filter(x=>x.level==='warning').length,info=0;
+ const critical=alerts.filter(x=>x.level==='critical').length,warning=alerts.filter(x=>x.level==='warning').length,info=[sourceState.stock,sourceState.clients,sourceState.tasks].filter(Boolean).length;
  const set=(id,v)=>{const el=$(id);if(el)el.textContent=String(v)};
  set('alert-critical-count',critical);set('alert-warning-count',warning);set('alert-info-count',info);
  const total=$('alert-total');if(total){total.textContent=alerts.length?alerts.length+' aktif uyarı':'Her şey yolunda';total.className='alert-total'+(alerts.length?' has-alert':'')}
