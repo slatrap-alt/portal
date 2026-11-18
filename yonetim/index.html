@@ -35,6 +35,16 @@
   <article class="exec-kpi amber"><div class="k-label">Vadesi geçmiş alacak <span class="k-icon">!</span></div><strong id="cx-overdue">—</strong><small>Ödeme planında vadesi geçmiş, açık kalan tutar</small></article>
   <article class="exec-kpi"><div class="k-label">Bu ay tamamlanan <span class="k-icon">▦</span></div><strong id="cx-month-done">—</strong><small>Tamamlanma tarihine göre</small></article>
  </div>
+ <div class="exec-grid" style="margin-top:12px">
+  <article class="exec-kpi"><div class="k-label">Bu ay alınan sipariş <span class="k-icon">↗</span></div><strong id="cx-month-orders">—</strong><small>İş başlangıç tarihine göre · teklif hariç</small></article>
+  <article class="exec-kpi green"><div class="k-label">Bu ay tahsilat <span class="k-icon">₺</span></div><strong id="cx-month-collected">—</strong><small>Tarihi kayıtlı ödeme hareketleri</small></article>
+  <article class="exec-kpi red"><div class="k-label">Bu ay gider <span class="k-icon">↘</span></div><strong id="cx-month-expenses">—</strong><small>Tarihi kayıtlı gider hareketleri</small></article>
+  <article class="exec-kpi"><div class="k-label">Ortalama teslim süresi <span class="k-icon">◷</span></div><strong id="cx-average-days">—</strong><small>Tamamlanan işlerde gün · kayıtlı tarihler</small></article>
+ </div>
+ <div class="exec-panels">
+  <div class="exec-panel"><h3>Takip gerektiren işler</h3><p>Teslim tarihi geçmiş veya yaklaşan üretim işleri</p><div class="rows" id="cx-due-jobs"><div class="exec-loading">Veri bekleniyor…</div></div></div>
+  <div class="exec-panel"><h3>İş bazında kayıtlı kâr</h3><p>İş bedeli − dosyaya girilmiş gider · en yüksek 6 iş</p><div class="rows" id="cx-profit-jobs"><div class="exec-loading">Veri bekleniyor…</div></div></div>
+ </div>
  <div class="exec-panels">
   <div class="exec-panel"><h3>İşlerin aşamalara göre dağılımı</h3><p>Teklif, üretim ve tamamlanma durumu</p><div class="state-bars" id="cx-state-bars"><div class="exec-loading">Müşteri dosyaları bekleniyor…</div></div></div>
   <div class="exec-panel"><h3>Son 6 ayın iş bedeli</h3><p>Üretimde ve tamamlanmış işlerin geliş ayına göre toplamı</p><div class="trend-chart" id="cx-trend"><div class="exec-loading">Veri bekleniyor…</div></div></div>
@@ -50,7 +60,7 @@
  </div>
  <div class="job-groups" id="job-groups"><div class="job-empty">Müşteri dosyaları bekleniyor…</div></div>
 </section>
- <div class="exec-note">Hesaplama notu: Kâr = iş bedeli − dosyalara kaydedilmiş giderler. İşçilik, vergi, genel işletme giderleri veya kaydedilmemiş harcamalar dahil değildir. Alacak hesabında yalnızca Üretimde ve Tamamlandı durumundaki işler dikkate alınır. Teklif aşamasındaki dosyalar sipariş/ciro sayılmaz. Ödeme planı, gerçek tahsilat değildir; tahsilat yalnızca Ödemeler sekmesine girilmiş payments kayıtlarından hesaplanır. Fotoğraflar ve kişisel dosya ayrıntıları panele kopyalanmaz.</div>
+ <div class="exec-note">Hesaplama notu: Kâr = iş bedeli − dosyalara kaydedilmiş giderler. İşçilik, vergi, genel işletme giderleri veya kaydedilmemiş harcamalar dahil değildir. Aylık tahsilat/gider toplamlarında tarihi okunabilen hareketler sayılır. Ortalama teslim süresi yalnızca başlangıç ve tamamlanma tarihleri bulunan işlerden hesaplanır. Fire oranı ve malzemenin işe göre maliyeti mevcut kayıt yapısında güvenilir biçimde bulunmadığından gösterilmez. Alacak hesabında yalnızca Üretimde ve Tamamlandı durumundaki işler dikkate alınır. Teklif aşamasındaki dosyalar sipariş/ciro sayılmaz. Ödeme planı, gerçek tahsilat değildir; tahsilat yalnızca Ödemeler sekmesine girilmiş payments kayıtlarından hesaplanır. Fotoğraflar ve kişisel dosya ayrıntıları panele kopyalanmaz.</div>
 </section>
 <div class="grid">
  <article class="metric"><div class="metric-head">Toplam stok değeri <span class="ico">▤</span></div><div class="value" id="stock-value">—</div><div class="hint" id="stock-hint">Stok verisi bekleniyor</div></article>
@@ -119,7 +129,21 @@ function renderCustomer(){
  const contracts=sum(orderFiles,c=>c.price),collected=sum(orderFiles,paid),expenses=sum(orderFiles,cost),receivable=Math.max(0,contracts-collected),profit=contracts-expenses,margin=contracts>0?profit/contracts*100:0;
  const now=new Date(),monthKey=now.toISOString().slice(0,7),monthDone=completed.filter(c=>{const t=Number(c.completedAt)||Number(c.updated)||Number(c.createdAt)||0;return t&&new Date(t).toISOString().slice(0,7)===monthKey}).length;
  const overdue=sum(orderFiles,c=>{let paid=Math.max(0,(Array.isArray(c.payments)?c.payments:[]).reduce((v,p)=>v+(Number(p.amount)||0),0));return [...(Array.isArray(c.paymentPlan)?c.paymentPlan:[])].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).reduce((n,p)=>{const amount=Math.max(0,Number(p.amount)||0),covered=Math.min(paid,amount);paid-=covered;const remaining=amount-covered;return n+(String(p.date||'')<now.toISOString().slice(0,10)?remaining:0)},0)});
+ const parseDate=v=>{if(!v)return null;if(v instanceof Date)return isNaN(v)?null:v; if(typeof v==='number'){const d=new Date(v);return isNaN(d)?null:d}const s=String(v).trim();if(!s)return null;const d=new Date(s);return isNaN(d)?null:d};
+ const monthTotal=(arr,key)=>arr.reduce((n,x)=>{const d=parseDate(x[key]||x.createdAt||x.date);return n+(d&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()?(Number(x.amount)||0):0)},0);
+ const monthOrders=sum(orderFiles,f=>{const d=parseDate(f.jobDate||f.createdAt);return d&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()?f.price:0});
+ const monthCollected=sum(orderFiles,f=>monthTotal(Array.isArray(f.payments)?f.payments:[],'date'));
+ const monthExpenses=sum(orderFiles,f=>monthTotal(Array.isArray(f.expenses)?f.expenses:[],'date'));
+ const durations=completed.map(f=>{const a=parseDate(f.jobDate||f.createdAt),b=parseDate(f.completedAt||f.updated);return a&&b&&b>=a?(b-a)/86400000:null}).filter(x=>x!==null);
+ const averageDays=durations.length?durations.reduce((a,b)=>a+b,0)/durations.length:null;
+ const dueRows=active.map(f=>({f,d:parseDate(f.delivery)})).filter(x=>x.d).sort((a,b)=>a.d-b.d);
+ const dueHtml=dueRows.filter(x=>x.d<new Date(now.getFullYear(),now.getMonth(),now.getDate()+1)||x.d<=new Date(now.getTime()+7*86400000)).slice(0,7).map(({f,d})=>{const late=d<new Date(now.getFullYear(),now.getMonth(),now.getDate());return '<div class="row"><span><b>'+safeText(f.name||'İsimsiz müşteri')+'</b><small>'+safeText(f.job||'')+' · '+d.toLocaleDateString('tr-TR')+'</small></span><span class="tag '+(late?'red':'amber')+'">'+(late?'Gecikti':'7 gün içinde')+'</span></div>'}).join('');
+ const profitRows=orderFiles.map(f=>({f,p:(Number(f.price)||0)-cost(f)})).sort((a,b)=>b.p-a.p).slice(0,6);
+ const profitHtml=profitRows.map(({f,p})=>'<div class="row"><span><b>'+safeText(f.name||'İsimsiz müşteri')+'</b><small>'+safeText(f.job||'')+'</small></span><b class="'+(p<0?'bad':'good')+'">'+money2(p)+'</b></div>').join('');
  const put=(id,v)=>{const el=$(id);if(el)el.textContent=v};
+ put('cx-month-orders',money2(monthOrders));put('cx-month-collected',money2(monthCollected));put('cx-month-expenses',money2(monthExpenses));put('cx-average-days',averageDays===null?'—':averageDays.toLocaleString('tr-TR',{maximumFractionDigits:1})+' gün');
+ $('cx-due-jobs').innerHTML=dueHtml||'<div class="empty">Yaklaşan veya gecikmiş teslimat görünmüyor ya da teslim tarihi girilmemiş.</div>';
+ $('cx-profit-jobs').innerHTML=profitHtml||'<div class="empty">İş kaydı bulunmuyor.</div>';
  put('cx-total',live.length);put('cx-offers',offers.length);put('cx-active',active.length);put('cx-completed',completed.length);put('cx-contracts',money2(contracts));put('cx-collected',money2(collected));put('cx-receivable',money2(receivable));put('cx-expenses',money2(expenses));put('cx-profit',money2(profit));put('cx-margin',contracts?('%'+margin.toLocaleString('tr-TR',{maximumFractionDigits:1})):'—');put('cx-overdue',money2(overdue));put('cx-month-done',monthDone);
  put('client-source-status','Müşteri Dosyaları · '+live.length+' kayıt');
  const max=Math.max(1,live.length);$('cx-state-bars').innerHTML=[['Teklif',offers.length,'#c49a52'],['Üretimde',active.length,'#6395bd'],['Tamamlandı',completed.length,'#56a184']].map(([label,n,color])=>'<div class="state-line"><span>'+label+'</span><div class="state-track"><div class="state-fill" style="width:'+(n/max*100)+'%;background:'+color+'"></div></div><b class="state-count">'+n+'</b></div>').join('');
