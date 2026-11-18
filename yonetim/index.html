@@ -33,7 +33,7 @@
 <div class="foot">ACANLAR MOBİLYA DEKORASYON · YÖNETİCİ MERKEZİ</div>
 </div>
 <div class="locked" id="login-screen"><form class="login" id="login-form"><h2>Yönetici girişi</h2><p>Diğer Acanlar uygulamalarında kullandığın atölye hesabıyla giriş yap. Bu ekran kayıtları yalnızca görüntüler, mevcut uygulama verilerini değiştirmez.</p><div class="field"><label>E-posta</label><input id="email" type="email" autocomplete="username" required></div><div class="field"><label>Şifre</label><input id="password" type="password" autocomplete="current-password" required></div><div class="err" id="error"></div><button class="primary" id="login-button">Yönetici ekranını aç</button></form></div>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" onerror="document.getElementById('error').textContent='Firebase bağlantı dosyası yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.'"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" onerror="document.getElementById('error').textContent='Giriş servisi yüklenemedi. Sayfayı yenile veya farklı tarayıcı dene.'"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" onerror="document.getElementById('error').textContent='Veri servisi yüklenemedi. Sayfayı yenile.'"></script>
 <script>
 (function(){
 const cfg={apiKey:'AIzaSyB3Pfgk5Z8x4c95BqfPcnNZHNYQ01pQpSU',authDomain:'oykum-6de70.firebaseapp.com',projectId:'oykum-6de70',storageBucket:'oykum-6de70.firebasestorage.app',messagingSenderId:'908914397464',appId:'1:908914397464:web:63bcd5f48fcce81cf2ce6d'};
@@ -68,8 +68,19 @@ function connect(u){stopAll();user=u;if(!u){$('dashboard').hidden=true;$('login-
  listen(db.collection('acanlar_fiyat_v2').doc(uid).collection('quotes'),snap=>{pricingQuotes=snap.docs.map(d=>d.data()).filter(x=>!x.deleted);render()},'pricing');
  listen(db.collection('acanlar_fiyat_v2').doc(uid).collection('manual_quotes'),snap=>{manualQuotes=snap.docs.map(d=>d.data()).filter(x=>!x.deleted);render()},'manual');
 }
-try{app=firebase.initializeApp(cfg,'acanlar-manager');auth=app.auth();db=app.firestore();auth.onAuthStateChanged(connect)}catch(e){$('error').textContent='Firebase başlatılamadı: '+e.message}
-$('login-form').addEventListener('submit',async e=>{e.preventDefault();$('login-button').disabled=true;$('error').textContent='';try{await auth.signInWithEmailAndPassword($('email').value.trim(),$('password').value)}catch(err){$('error').textContent='Giriş başarısız. E-posta, şifre veya bağlantıyı kontrol et.'}finally{$('login-button').disabled=false}});
+try{
+ if(!window.firebase||!firebase.initializeApp) throw new Error('Firebase kitaplıkları yüklenemedi. İnternet bağlantısı veya içerik engelleyici erişimi kesiyor olabilir.');
+ app=firebase.apps.find(x=>x.name==='acanlar-manager')||firebase.initializeApp(cfg,'acanlar-manager');
+ auth=app.auth();db=app.firestore();
+ auth.onAuthStateChanged(connect,err=>{$('error').textContent='Oturum kontrolü yapılamadı: '+(err.message||err.code||'Bağlantı hatası')});
+}catch(e){$('error').textContent='Başlatma hatası: '+(e.message||e)}
+$('login-form').addEventListener('submit',async e=>{e.preventDefault();$('login-button').disabled=true;$('error').textContent='';try{
+ if(!auth) throw new Error('Giriş servisi henüz hazır değil. Sayfayı yenileyip tekrar dene.');
+ await auth.signInWithEmailAndPassword($('email').value.trim(),$('password').value);
+}catch(err){
+ const messages={'auth/invalid-email':'E-posta adresi geçersiz.','auth/user-not-found':'Bu e-posta ile kayıtlı hesap bulunamadı.','auth/wrong-password':'Şifre hatalı.','auth/invalid-credential':'E-posta veya şifre hatalı.','auth/too-many-requests':'Çok fazla deneme yapıldı. Bir süre bekleyip tekrar dene.','auth/network-request-failed':'İnternet bağlantısı kurulamadı.'};
+ $('error').textContent=messages[err.code]||('Giriş yapılamadı: '+(err.message||err.code||'Bilinmeyen hata'));
+}finally{$('login-button').disabled=false}});
 $('logout').addEventListener('click',()=>auth.signOut());
 })();
 </script></body></html>
