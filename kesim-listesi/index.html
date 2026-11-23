@@ -590,8 +590,11 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
         return new Promise(function(r){ if(im.complete) r(); else { im.onload=r; im.onerror=r; } });
       });
       return Promise.all(imgs).then(function(){
-      var opts = {margin:[10,10,14,10], image:{type:'jpeg',quality:0.95},
-        html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+      var rowCount = 0; S.bloklar.forEach(function(b){ rowCount += b.rows.filter(function(r){ return !isEmpty(r); }).length + 3; });
+      var big = rowCount > 110;                 // çok uzun listede tarayıcı belleğini korumak için
+      var scl = big ? 2.5 : (rowCount > 60 ? 3 : 4);
+      var opts = {margin:[10,10,14,10], image:{type: big ? 'jpeg' : 'png', quality:0.99},
+        html2canvas:{scale:scl,useCORS:true,backgroundColor:'#ffffff',letterRendering:true},
         jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
         pagebreak:{mode:['css','legacy'],avoid:'tr'}};
       return new Promise(function(resolve,reject){
