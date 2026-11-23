@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kesim Listesi</title>
+<style>
+:root{
+  --navy:#222a3a; --navy2:#3b4763; --accent:#b3242b; --line:#d3d8e1; --soft:#f5f6f9;
+  --text:#1c2430; --muted:#6b7686; --bg:#e4e7ee;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+
+/* ---------- Araç çubuğu ---------- */
+.toolbar{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.toolbar .brand{font-weight:700;letter-spacing:.5px;margin-right:auto}
+.btn{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font:inherit;font-size:13px}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#1b1b1b;font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.toolbar label.opt{font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer}
+
+/* ---------- Sayfa ---------- */
+.sheet{background:#fff;width:210mm;max-width:100%;margin:18px auto;padding:12mm 12mm 14mm;box-shadow:0 4px 18px rgba(20,35,60,.15);min-height:297mm}
+input,select,textarea{font:inherit;color:inherit}
+.sheet input,.sheet select,.sheet textarea{border:1px solid transparent;background:transparent;border-radius:4px;padding:5px 6px;width:100%;outline:none}
+.sheet input:hover,.sheet select:hover,.sheet textarea:hover{border-color:var(--line);background:#fcfdff}
+.sheet input:focus,.sheet select:focus,.sheet textarea:focus{border-color:var(--navy2);background:#fff;box-shadow:0 0 0 2px rgba(42,70,112,.15)}
+::placeholder{color:#a9b2bf}
+
+/* Üst başlık */
+.head{display:flex;align-items:center;gap:16px;border-bottom:4px solid var(--navy);padding-bottom:10px;position:relative}
+.head::after{content:"";position:absolute;left:0;bottom:-8px;width:90px;height:4px;background:var(--accent)}
+.logo-box{width:86px;height:86px;border:1px dashed var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex:none;color:var(--muted);font-size:11px;text-align:center}
+.logo-box img{max-width:100%;max-height:100%}
+.logo-box:not(.empty){border-color:transparent}
+.head .firma{flex:1}
+.head .firma input{font-size:26px;font-weight:800;color:var(--navy);letter-spacing:.5px;padding:2px 4px}
+.head .firma .alt input{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:1px}
+.head .baslik{text-align:right}
+.head .baslik .tarih{font-size:13px;font-weight:600;color:var(--muted);padding-right:6px;margin-top:2px}
+.head .baslik input{font-size:20px;font-weight:700;color:var(--navy);text-align:right;letter-spacing:2px}
+
+/* Bilgi kutusu */
+.info{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:22px;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.info .cell{padding:6px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--soft)}
+.info .cell:nth-child(4n){border-right:0}
+.info .cell.wide{grid-column:span 2}
+.info .cell.full{grid-column:1/-1;border-right:0}
+.info .cell:nth-last-child(-n+1){border-bottom:0}
+.info label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600}
+.info input{font-weight:600;padding:3px 0 !important}
+
+/* Bloklar */
+.blok{margin-top:18px;break-inside:auto}
+.blok-head{display:flex;align-items:center;gap:10px;background:var(--navy);color:#fff;border-radius:6px 6px 0 0;padding:4px 10px}
+.blok-head .tag{font-size:10px;letter-spacing:1px;opacity:.7;text-transform:uppercase;white-space:nowrap}
+.blok-head input{color:#fff !important;font-weight:700;font-size:15px;letter-spacing:.5px}
+.blok-head input:hover,.blok-head input:focus{background:rgba(255,255,255,.12) !important;border-color:rgba(255,255,255,.4) !important}
+.blok-head .pvcwrap{display:flex;align-items:center;gap:6px;margin-left:auto;background:var(--accent);color:#1b1b1b;padding:3px 10px;border-radius:4px;font-weight:700;white-space:nowrap}
+.blok-head .pvcwrap select{color:#1b1b1b !important;width:76px;text-align:center;padding:2px 4px;font-size:14px;font-weight:700;cursor:pointer;border-color:rgba(0,0,0,.25) !important}
+.blok-head .pvcwrap select:hover,.blok-head .pvcwrap select:focus{background:rgba(255,255,255,.5) !important}
+.blok-head .x{background:transparent;border:0;color:#fff;opacity:.6;cursor:pointer;font-size:18px;padding:0 4px}
+.blok-head .x:hover{opacity:1}
+
+table.kesim{width:100%;border-collapse:collapse;table-layout:fixed;border:1px solid var(--navy)}
+table.kesim th{background:#e4eaf3;color:var(--navy);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:6px 4px;border:1px solid var(--line);text-align:center}
+table.kesim th.grp{background:#d5deec}
+table.kesim td{border:1px solid var(--line);padding:0;height:27px}
+table.kesim td input,table.kesim td select{border-radius:0 !important;text-align:center;height:26px;padding:2px 4px !important}
+table.kesim td.sira{text-align:center;color:var(--muted);font-weight:600;background:var(--soft);font-size:12px}
+table.kesim td.aciklama input{text-align:left}
+table.kesim td.del{border:0;width:26px;text-align:center}
+table.kesim td.del button{border:0;background:transparent;color:#b94a48;cursor:pointer;font-size:15px;opacity:.5}
+table.kesim td.del button:hover{opacity:1}
+table.kesim tbody tr:nth-child(even) td:not(.sira){background:#fafbfd}
+table.kesim select{appearance:none;-webkit-appearance:none;cursor:pointer}
+table.kesim tfoot td{background:var(--soft);font-weight:700;color:var(--navy);padding:6px 8px;height:auto;text-align:center;font-size:12px}
+.col-sira{width:9%}.col-boy{width:15%}.col-en{width:15%}.col-adet{width:10%}.col-pvc{width:10%}.col-not{width:auto}.col-del{width:26px}
+.addrow{margin-top:6px;border:1px dashed var(--navy2);background:transparent;color:var(--navy2);padding:5px 12px;border-radius:5px;cursor:pointer;font:inherit;font-size:12px}
+.addrow:hover{background:var(--soft)}
+.addblok{display:block;margin:22px auto 0;border:2px dashed var(--navy2);background:transparent;color:var(--navy2);padding:10px 20px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600}
+.addblok:hover{background:var(--soft)}
+
+/* Özet */
+.ozet{margin-top:22px;break-inside:avoid}
+.ozet h3{margin:0 0 6px;font-size:12px;letter-spacing:2px;color:var(--navy);text-transform:uppercase;border-left:4px solid var(--accent);padding-left:8px}
+.ozet table{width:100%;border-collapse:collapse;font-size:13px}
+.ozet th,.ozet td{border:1px solid var(--line);padding:6px 10px;text-align:center}
+.ozet th{background:var(--navy);color:#fff;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.ozet td:first-child{text-align:left;font-weight:600}
+.ozet tr.genel td{background:#e4eaf3;font-weight:800;color:var(--navy)}
+.not-box{margin-top:14px;break-inside:avoid}
+.not-box label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.not-box textarea{min-height:54px;resize:vertical;border:1px solid var(--line) !important;margin-top:3px}
+.imza{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:26px;break-inside:avoid}
+.imza div{border-top:1px solid var(--navy);padding-top:4px;text-align:center;font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;height:50px}
+.foot{margin-top:14px;text-align:center;font-size:10px;color:var(--muted)}
+
+/* Ekranda boş satır soluk */
+tr.empty td.sira{opacity:.45}
+
+
+/* ---------- Görsel iyileştirmeler ---------- */
+.toolbar{background:linear-gradient(90deg,#1a202d,#2f3a52);border-bottom:3px solid var(--accent)}
+.btn{border-radius:8px;transition:.15s}
+.btn.primary{color:#fff;box-shadow:0 2px 6px rgba(179,36,43,.45)}
+.logo-box{width:96px;height:96px;border-radius:10px}
+.head{gap:20px;padding-bottom:12px;border-bottom:3px solid var(--navy)}
+.head::after{height:3px;bottom:-6px;width:130px}
+.head .firma input{font-size:28px;letter-spacing:1.5px}
+.head .baslik input{font-size:22px;letter-spacing:4px}
+.head .baslik .tarih{color:var(--accent);font-size:13px;font-weight:700;letter-spacing:1px}
+.info{margin-top:24px;border-radius:8px;border-color:var(--line);box-shadow:0 1px 3px rgba(20,30,50,.06)}
+.info .cell{background:#f7f8fb}
+.info label{color:var(--accent);font-weight:700}
+.blok{margin-top:20px}
+.blok-head{background:linear-gradient(90deg,var(--navy),var(--navy2));border-left:6px solid var(--accent);padding:5px 10px 5px 12px}
+.blok-head .pvcwrap{background:var(--accent);color:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.blok-head .pvcwrap select{color:#fff !important;border-color:rgba(255,255,255,.45) !important}
+.blok-head .pvcwrap select option{color:#1c2430;background:#fff}
+.blok-head .pvcwrap select:hover,.blok-head .pvcwrap select:focus{background:rgba(255,255,255,.18) !important}
+table.kesim{border:1.5px solid var(--navy)}
+table.kesim th{background:#eceff5;color:var(--navy)}
+table.kesim th.grp{background:#dde2ec}
+table.kesim td.sira{background:#eef0f5;color:var(--navy2)}
+table.kesim tbody tr:nth-child(even) td:not(.sira){background:#f8f9fc}
+table.kesim tfoot td{background:#eceff5;border-top:2px solid var(--navy)}
+.ozet th{background:var(--navy)}
+.ozet tr.genel td{background:#f8e6e7;color:var(--accent);font-size:14px}
+.ozet h3{border-left-color:var(--accent)}
+.imza div{border-top-color:var(--navy)}
+@media screen{ .sheet{border-top:6px solid var(--accent);border-radius:4px} }
+
+.head .firma{flex:1 1 0;min-width:0}
+.head .baslik{flex:0 0 250px}
+
+/* ---------- Gri tonlu ayrım ---------- */
+table.kesim th{background:#cfd4dc;color:#1c2330;border-color:#aeb5c1}
+table.kesim th.grp{background:#b9c0cb}
+table.kesim td{border-color:#9aa3b3}
+table.kesim tbody tr td{background:#fff}
+table.kesim tbody tr:nth-child(even) td{background:#d3d8e0}
+table.kesim tbody tr td.sira{background:#c3c8d3;color:#2b3447}
+table.kesim tbody tr:nth-child(even) td.sira{background:#b0b7c5}
+table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
+.toolbar .brand{display:flex;align-items:center;gap:12px}
+.toolbar .blogo{background:#fff;border-radius:8px;padding:2px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toolbar .blogo img{width:100%;height:100%;object-fit:contain;border-radius:6px}
+.toolbar .btxt{display:flex;flex-direction:column;line-height:1.15}
+.toolbar .btxt b{font-size:17px;letter-spacing:1.5px}
+.toolbar .btxt small{font-size:11px;letter-spacing:2px;opacity:.7;text-transform:uppercase;font-weight:500}
+
+.btn.wa{border-color:#25d366;color:#25d366;font-weight:600}
+.btn.wa:hover{background:rgba(37,211,102,.15)}
+.btn:disabled{opacity:.6;cursor:wait}
+#toast{display:none;position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:90vw;background:#222a3a;color:#fff;padding:12px 18px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.35);border-left:5px solid var(--accent);z-index:50;font-size:13px}
+.dupwarn{margin-top:6px;padding:6px 10px;background:#fff4d6;border:1px solid #e3b341;color:#7a5200;border-radius:6px;font-size:12px;font-weight:600}
+.dupwarn:empty{display:none}
+@media screen{ table.kesim tbody tr.dup td{background:#fde3b0 !important} }
+@media screen and (max-width:760px){
+  body{font-size:15px}
+  .toolbar{position:static;padding:8px 10px;gap:6px}
+  .toolbar .brand{flex:1 1 100%}
+  .toolbar .btn{padding:10px 10px;font-size:12.5px;flex:1 1 auto}
+  .toolbar label.opt{font-size:12px;flex:1 1 100%}
+  #savedProjects{flex:1 1 100%;max-width:none !important;min-height:38px}
+  #cloudStatus{flex:1 1 100%;min-width:0 !important}
+  .sheet{width:100%;margin:0;padding:12px 10px 22px;min-height:0;border-radius:0}
+  .head{flex-wrap:wrap;gap:10px}
+  .logo-box{width:64px;height:64px}
+  .head .firma{flex:1 1 calc(100% - 80px)}
+  .head .firma input{font-size:20px}
+  .head .baslik{flex:1 1 100%;text-align:left}
+  .head .baslik input{text-align:left;font-size:17px;letter-spacing:2px}
+  .info{grid-template-columns:1fr}
+  .info .cell,.info .cell.wide,.info .cell.full{grid-column:auto;border-right:0}
+  .blok-head{flex-wrap:wrap}
+  .blok-head input{font-size:14px}
+  .sheet input,.sheet select,.sheet textarea{font-size:16px}
+  table.kesim td{height:42px}
+  table.kesim td input,table.kesim td select{height:40px}
+  .col-sira{width:9%}.col-boy{width:17%}.col-en{width:17%}.col-adet{width:12%}.col-pvc{width:10%}.col-del{width:34px}
+  table.kesim th{font-size:9.5px;letter-spacing:0;padding:4px 2px}
+  table.kesim td.del button{font-size:18px;padding:8px}
+  .ozet table{font-size:12px}.ozet th,.ozet td{padding:5px 4px}
+  .imza{gap:8px}
+  #toast{left:10px;right:10px;transform:none;max-width:none}
+}
+/* ---------- Yazdırma / PDF ---------- */
+@page{size:A4 portrait;margin:9mm 9mm 15mm 9mm;@bottom-center{content:"Sayfa " counter(page) " / " counter(pages);font-family:"Segoe UI",Arial,sans-serif;font-size:9pt;color:#6b7686}}
+@media print{
+  html,body{background:#fff}
+  .toolbar,.noprint,.addrow,.addblok,td.del,th.del,col.col-del,.blok-head .x,.logo-box.empty{display:none !important}
+  .sheet{box-shadow:none;margin:0;width:auto;padding:0;min-height:0}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet input,.sheet select,.sheet textarea{border-color:transparent !important;background:transparent !important;box-shadow:none !important}
+  ::placeholder{color:transparent !important}
+  textarea{resize:none}
+  .not-box.hide-print{display:none}
+  .dupwarn,#toast{display:none !important}
+  table.kesim tbody tr td{background:#fff !important}
+  table.kesim tbody tr td.sira{background:#c3c8d3 !important}
+  table.kesim tbody tr.zp td{background:#d3d8e0 !important}
+  table.kesim tbody tr.zp td.sira{background:#b0b7c5 !important}
+  .blok-head .pvcwrap{padding:4px 14px}
+  .blok-head .pvcwrap select{appearance:none !important;-webkit-appearance:none !important;-moz-appearance:none !important;background-image:none !important;border:0 !important;width:auto !important;padding:0 0 0 4px !important;text-align:left;font-size:15px;color:#fff !important}
+  body:not(.showempty) tr.empty{display:none}
+  tr{break-inside:avoid}
+  thead{display:table-header-group}
+  .blok-head{break-after:avoid}
+  .info .cell.noval{display:none}
+  .info:not(:has(.cell:not(.noval))){display:none}
+  body.supplier.noacik .aciklama{display:none !important}
+  body.supplier .info,body.supplier .ozet,body.supplier .not-box,body.supplier .imza,body.supplier tfoot{display:none !important}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="brand"><span class="blogo"><img id="brandLogo" alt=""></span><span class="btxt"><b>ACANLAR MOBİLYA</b><small>Kesim Listesi Programı</small></span></div>
+  <label class="opt"><input type="checkbox" id="showEmpty"> Boş satırları da yazdır</label>
+  <button class="btn primary" id="btnCloudSave">☁ Veritabanına Kaydet</button>
+  <select id="savedProjects" class="btn" style="max-width:230px;background:#fff;color:#222a3a;border-color:#9aa3b3">
+    <option value="">Kayıtlı kesim listeleri</option>
+  </select>
+  <button class="btn" id="btnCloudLoad">Kaydı Aç</button>
+  <button class="btn" id="btnCloudDelete">Kaydı Sil</button>
+  <button class="btn" id="btnNew">Yeni liste</button>
+  <button class="btn" id="btnCloudAccount">Buluta Bağlan</button>
+  <button class="btn" id="btnCloudLogout" style="display:none">Çıkış</button>
+  <span id="cloudStatus" style="font-size:12px;color:#dce5f5;min-width:130px">Bulut bağlantısı bekleniyor</span>
+  <label class="opt" title="Tedarikçiye Gönder çıktısında Açıklama sütunu"><input type="checkbox" id="supAcik"> Tedarikçi çıktısında açıklamalar</label>
+  <button class="btn" id="btnSupplier">Tedarikçiye Gönder</button>
+  <button class="btn wa" id="btnWA" title="Tedarikçi çıktısını PDF olarak WhatsApp ile paylaş">WhatsApp'a Gönder</button>
+  <button class="btn primary" id="btnPrint">PDF / Yazdır</button>
+  <input type="file" id="fileLogo" accept="image/*" hidden>
+</div>
+
+<div class="sheet" id="root"></div>
+<div id="toast" class="noprint"></div>
+
+<script>
+(function(){
+  var KEY = 'kesimListesi.v1';
+  var DEFAULT_LOGO = 'data:image/jpeg;base64,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';
+  var uid = function(){ return Math.random().toString(36).slice(2,9); };
+  var newRow = function(){ return {boy:'',en:'',adet:'',pb:'',pe:'',not:''}; };
+  var newBlock = function(m,p){
+    var rows=[]; for(var i=0;i<12;i++) rows.push(newRow());
+    return {id:uid(), malzeme:m||'', pvc:p||'0,40', rows:rows};
+  };
+  var today = function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  var todayTR = function(){ var d=new Date(); return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); };
+  var defaults = function(){
+    return {
+      firma:'ACANLAR MOBİLYA', altbaslik:'', baslik:'KESİM LİSTESİ',
+      musteri:'', siparis:'', tarih:today(), proje:'', birim:'cm', not:'', logo:DEFAULT_LOGO, showEmpty:false, supAcik:true,
+      bloklar:[ newBlock('PARLAK BEYAZ SUNTA','0,40') ]
+    };
+  };
+  var S;
+  document.getElementById('brandLogo').src = DEFAULT_LOGO;
+  try { var raw = localStorage.getItem(KEY); S = raw ? JSON.parse(raw) : null; } catch(e){ S = null; }
+  if(!S || !Array.isArray(S.bloklar)) S = defaults();
+  if(!S.logo) S.logo = DEFAULT_LOGO;
+
+  var $ = function(s,ctx){ return (ctx||document).querySelector(s); };
+  var esc = function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+  var num = function(v){ var n = parseFloat(String(v).replace(',','.')); return isNaN(n)?0:n; };
+  var fmt = function(n,d){ return n.toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}); };
+  var isEmpty = function(r){ return !(r.boy||r.en||r.adet||r.pb||r.pe||r.not); };
+
+  var saveT;
+  function save(){
+    clearTimeout(saveT);
+    saveT = setTimeout(function(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }, 250);
+  }
+
+  function rowHTML(bi, ri, r){
+    var sel = function(f,v){
+      return '<select data-b="'+bi+'" data-r="'+ri+'" data-f="'+f+'">'+
+        '<option value=""'+(v===''?' selected':'')+'></option>'+
+        '<option value="1"'+(v==='1'?' selected':'')+'>1</option>'+
+        '<option value="2"'+(v==='2'?' selected':'')+'>2</option></select>';
+    };
+    var inp = function(f,v,extra){
+      return '<input type="text" '+(extra||'')+' data-b="'+bi+'" data-r="'+ri+'" data-f="'+f+'" value="'+esc(v)+'">';
+    };
+    return '<tr class="'+(isEmpty(r)?'empty':'')+'" data-row="'+bi+'-'+ri+'">'+
+      '<td class="sira">'+(ri+1)+'</td>'+
+      '<td>'+inp('boy',r.boy,'inputmode="decimal" autocomplete="off"')+'</td>'+
+      '<td>'+inp('en',r.en,'inputmode="decimal" autocomplete="off"')+'</td>'+
+      '<td>'+inp('adet',r.adet,'inputmode="numeric" autocomplete="off"')+'</td>'+
+      '<td>'+sel('pb',r.pb)+'</td>'+
+      '<td>'+sel('pe',r.pe)+'</td>'+
+      '<td class="aciklama">'+inp('not',r.not,'autocomplete="off"')+'</td>'+
+      '<td class="del"><button type="button" data-del="'+bi+'-'+ri+'" title="Satırı sil">✕</button></td>'+
+    '</tr>';
+  }
+
+  var PVC_LIST = ['0,40','0,80','1,00','2,00'];
+  function pvcOptions(cur){
+    var l = PVC_LIST.slice(); if(cur && l.indexOf(cur)<0) l.push(cur);
+    return l.map(function(v){ return '<option value="'+esc(v)+'"'+(v===cur?' selected':'')+'>'+esc(v)+'</option>'; }).join('');
+  }
+  function blockHTML(b, bi){
+    var rows = b.rows.map(function(r,ri){ return rowHTML(bi,ri,r); }).join('');
+    return '<section class="blok" data-blok="'+bi+'">'+
+      '<div class="blok-head">'+
+        '<span class="tag">Malzeme</span>'+
+        '<input type="text" data-bm="'+bi+'" value="'+esc(b.malzeme)+'" placeholder="Malzeme / Renk (ör. PARLAK BEYAZ SUNTA)">'+
+        '<span class="pvcwrap">PVC <select data-bp="'+bi+'">'+pvcOptions(b.pvc)+'</select></span>'+
+        '<button class="x noprint" type="button" data-delblok="'+bi+'" title="Bu malzeme bölümünü sil">✕</button>'+
+      '</div>'+
+      '<table class="kesim">'+
+        '<colgroup><col class="col-sira"><col class="col-boy"><col class="col-en"><col class="col-adet"><col class="col-pvc"><col class="col-pvc"><col class="col-not aciklama"><col class="col-del"></colgroup>'+
+        '<thead>'+
+          '<tr><th rowspan="2">Sıra</th><th rowspan="2">Boy <span class="u">('+esc(S.birim)+')</span></th><th rowspan="2">En <span class="u">('+esc(S.birim)+')</span></th><th rowspan="2">Adet</th>'+
+          '<th class="grp" colspan="2">PVC <span class="pv">'+esc(b.pvc)+'</span></th><th rowspan="2" class="aciklama">Açıklama</th><th rowspan="2" class="del"></th></tr>'+
+          '<tr><th class="grp">Boy</th><th class="grp">En</th></tr>'+
+        '</thead>'+
+        '<tbody>'+rows+'</tbody>'+
+        '<tfoot><tr><td colspan="3" style="text-align:right">TOPLAM</td><td data-t="adet"></td><td colspan="2" data-t="m2"></td><td data-t="pvc"></td><td class="del" style="border:0;background:#fff"></td></tr></tfoot>'+
+      '</table>'+
+      '<button type="button" class="addrow" data-addrow="'+bi+'">+ Satır ekle</button>'+
+      '<div class="dupwarn noprint" data-dup></div>'+
+    '</section>';
+  }
+
+  function render(){
+    document.body.classList.toggle('showempty', !!S.showEmpty);
+    $('#showEmpty').checked = !!S.showEmpty;
+    $('#supAcik').checked = S.supAcik !== false;
+
+    var logo = S.logo
+      ? '<div class="logo-box" id="logoBox" title="Logoyu değiştirmek için tıklayın"><img src="'+S.logo+'" alt=""></div>'
+      : '<div class="logo-box empty" id="logoBox" title="Logo ekle">Logo<br>ekle</div>';
+
+    var info = function(label,key,type,cls,ph){
+      var has = !!S[key];
+      return '<div class="cell '+(cls||'')+(has?'':' noval')+'"><label>'+label+'</label>'+
+        '<input type="'+(type||'text')+'" data-top="'+key+'" value="'+esc(S[key])+'" placeholder="'+(ph||'')+'"></div>';
+    };
+
+    var html =
+      '<div class="head">'+logo+
+        '<div class="firma"><input type="text" data-top="firma" value="'+esc(S.firma)+'" placeholder="Firma adı">'+
+        '<div class="alt"><input type="text" data-top="altbaslik" value="'+esc(S.altbaslik)+'" placeholder="Adres / telefon (isteğe bağlı)"></div></div>'+
+        '<div class="baslik"><input type="text" data-top="baslik" value="'+esc(S.baslik)+'"><div class="tarih" id="autoDate">'+todayTR()+'</div></div>'+
+      '</div>'+
+      '<div class="info">'+
+        info('Müşteri / Cari','musteri','text','wide','Müşteri adı')+
+        info('Sipariş No','siparis','text','wide','')+
+        info('Proje / Mekan','proje','text','full','ör. Mutfak dolabı')+
+      '</div>'+
+      '<div id="bloklar">'+S.bloklar.map(blockHTML).join('')+'</div>'+
+      '<button type="button" class="addblok" id="addBlok">+ Yeni malzeme bölümü ekle (ör. MEBRAN, ARKALIK, CAMLI KAPAK)</button>'+
+      '<div class="ozet"><h3>Özet</h3><table id="ozet"></table></div>'+
+      '<div class="not-box'+(S.not?'':' hide-print')+'" id="notBox"><label>Notlar</label><textarea data-top="not" placeholder="Not yazabilirsiniz...">'+esc(S.not)+'</textarea></div>'+
+      '<div class="imza"><div>Hazırlayan</div><div>Kontrol</div><div>Onay</div></div>'+
+      '<div class="foot noprint">Birim: '+
+        '<select id="birim" style="width:auto;display:inline-block"><option value="cm"'+(S.birim==='cm'?' selected':'')+'>cm</option><option value="mm"'+(S.birim==='mm'?' selected':'')+'>mm</option></select>'+
+        ' · Ondalık için virgül veya nokta kullanabilirsiniz · Enter = alttaki satıra geç</div>'+
+      '';
+
+    $('#root').innerHTML = html;
+    updateTotals();
+  }
+
+  function calcBlock(b){
+    var adet=0,m2=0,pvc=0, k = S.birim==='mm' ? 1e6 : 1e4, kp = S.birim==='mm' ? 1000 : 100;
+    b.rows.forEach(function(r){
+      var a = num(r.adet); if(!a && (r.boy||r.en)) a = 1;
+      var bo=num(r.boy), en=num(r.en);
+      adet += a;
+      m2 += bo*en*a/k;
+      pvc += (bo*num(r.pb) + en*num(r.pe))*a/kp;
+    });
+    return {adet:adet,m2:m2,pvc:pvc};
+  }
+
+  function zebra(){
+    document.querySelectorAll('table.kesim tbody').forEach(function(tb){
+      var n=0;
+      tb.querySelectorAll('tr').forEach(function(tr){
+        var show = S.showEmpty || !tr.classList.contains('empty');
+        tr.classList.remove('zp');
+        if(show){ if(n%2===1) tr.classList.add('zp'); n++; }
+      });
+    });
+  }
+  function updateTotals(){
+    zebra();
+    var G={adet:0,m2:0,pvc:0}, rowsHtml='';
+    S.bloklar.forEach(function(b,bi){
+      var c = calcBlock(b);
+      G.adet+=c.adet; G.m2+=c.m2; G.pvc+=c.pvc;
+      var sec = $('[data-blok="'+bi+'"]');
+      if(sec){
+        $('[data-t="adet"]',sec).textContent = fmt(c.adet,0);
+        $('[data-t="m2"]',sec).textContent = fmt(c.m2,2)+' m²';
+        $('[data-t="pvc"]',sec).textContent = 'PVC '+fmt(c.pvc,2)+' m';
+        var pv = $('.pv',sec); if(pv) pv.textContent = b.pvc;
+        var seen={}, trs = sec.querySelectorAll('tbody tr'), msgs=[];
+        b.rows.forEach(function(r,ri){ var bo=num(r.boy), en=num(r.en); if(bo&&en){ var k=bo+' × '+en; (seen[k]=seen[k]||[]).push(ri); } });
+        Array.prototype.forEach.call(trs,function(tr){ tr.classList.remove('dup'); });
+        Object.keys(seen).forEach(function(k){
+          if(seen[k].length>1){
+            seen[k].forEach(function(ri){ if(trs[ri]) trs[ri].classList.add('dup'); });
+            msgs.push(k+' → satır '+seen[k].map(function(x){return x+1;}).join(', '));
+          }
+        });
+        var dw = $('[data-dup]',sec);
+        if(dw) dw.textContent = msgs.length ? '⚠ Aynı ölçü birden fazla girilmiş: '+msgs.join(' | ')+' (adetleri birleştirmek isteyebilirsiniz)' : '';
+      }
+      rowsHtml += '<tr><td>'+esc(b.malzeme||('Bölüm '+(bi+1)))+'</td><td>'+fmt(c.adet,0)+'</td><td>'+fmt(c.m2,2)+'</td><td>'+esc(b.pvc)+' → '+fmt(c.pvc,2)+'</td></tr>';
+    });
+    $('#ozet').innerHTML = '<tr><th style="text-align:left">Malzeme</th><th>Parça adedi</th><th>Alan (m²)</th><th>PVC (m)</th></tr>'+rowsHtml+
+      '<tr class="genel"><td>GENEL TOPLAM</td><td>'+fmt(G.adet,0)+'</td><td>'+fmt(G.m2,2)+'</td><td>—</td></tr>';
+  }
+
+  /* ---------- Olaylar ---------- */
+  var root = $('#root');
+
+  root.addEventListener('input', function(e){
+    var t = e.target;
+    if(t.dataset.top){ S[t.dataset.top] = t.value; var cl=t.closest('.cell'); if(cl) cl.classList.toggle('noval', !t.value); if(t.dataset.top==='not'){ $('#notBox').classList.toggle('hide-print', !t.value); } save(); return; }
+    if(t.dataset.bm!==undefined){ S.bloklar[+t.dataset.bm].malzeme = t.value; updateTotals(); save(); return; }
+    if(t.dataset.bp!==undefined){ S.bloklar[+t.dataset.bp].pvc = t.value; updateTotals(); save(); return; }
+    if(t.dataset.f){ rowChanged(t); }
+  });
+  root.addEventListener('change', function(e){
+    var t = e.target;
+    if(t.id==='birim'){ S.birim = t.value; save(); render(); return; }
+    if(t.dataset.bp!==undefined){ S.bloklar[+t.dataset.bp].pvc = t.value; updateTotals(); save(); return; }
+    if(t.dataset.f){ rowChanged(t); }
+  });
+
+  function rowChanged(t){
+    var bi=+t.dataset.b, ri=+t.dataset.r, b=S.bloklar[bi], r=b.rows[ri];
+    r[t.dataset.f] = t.value;
+    var tr = t.closest('tr'); tr.classList.toggle('empty', isEmpty(r));
+    // Son satıra yazılırsa otomatik yeni satır ekle
+    if(ri===b.rows.length-1 && !isEmpty(r)){ addRow(bi,false); }
+    updateTotals(); save();
+  }
+
+  function addRow(bi, focus){
+    var b=S.bloklar[bi]; b.rows.push(newRow());
+    var tb = $('[data-blok="'+bi+'"] tbody');
+    tb.insertAdjacentHTML('beforeend', rowHTML(bi,b.rows.length-1,b.rows[b.rows.length-1]));
+    if(focus){ var el = tb.lastElementChild.querySelector('input'); if(el) el.focus(); }
+    save();
+  }
+
+  root.addEventListener('keydown', function(e){
+    var t = e.target;
+    if(e.key==='Enter' && t.tagName==='INPUT' && t.dataset.f){
+      e.preventDefault();
+      var bi=+t.dataset.b, ri=+t.dataset.r, f=t.dataset.f;
+      var sel = '[data-b="'+bi+'"][data-r="'+(ri+1)+'"][data-f="'+f+'"]';
+      var nx = $(sel);
+      if(!nx){ addRow(bi,false); nx = $(sel); }
+      if(nx){ nx.focus(); if(nx.select) nx.select(); }
+    }
+  });
+
+  root.addEventListener('click', function(e){
+    var t = e.target;
+    if(t.closest('#logoBox')){ $('#fileLogo').click(); return; }
+    if(t.id==='addBlok'){ S.bloklar.push(newBlock('', '0,40')); save(); render(); return; }
+    if(t.dataset.addrow!==undefined){ addRow(+t.dataset.addrow,true); return; }
+    if(t.dataset.del){
+      var p = t.dataset.del.split('-'), bi=+p[0], ri=+p[1], b=S.bloklar[bi];
+      b.rows.splice(ri,1); if(!b.rows.length) b.rows.push(newRow());
+      save(); render(); return;
+    }
+    if(t.dataset.delblok!==undefined){
+      if(S.bloklar.length<2){ alert('En az bir bölüm kalmalı.'); return; }
+      if(confirm('Bu malzeme bölümü ve içindeki tüm satırlar silinsin mi?')){ S.bloklar.splice(+t.dataset.delblok,1); save(); render(); }
+    }
+  });
+  $('#fileLogo').addEventListener('change', function(e){
+    var f = e.target.files[0]; if(!f) return;
+    var fr = new FileReader();
+    fr.onload = function(){ S.logo = fr.result; save(); render(); };
+    fr.readAsDataURL(f); e.target.value='';
+  });
+
+  /* ---------- Araç çubuğu ---------- */
+  $('#showEmpty').addEventListener('change', function(e){ S.showEmpty = e.target.checked; document.body.classList.toggle('showempty', S.showEmpty); zebra(); save(); });
+
+  function pdfTitle(){
+    var parts=[S.firma||'Firma','Kesim Listesi'];
+    if(document.body.classList.contains('supplier')) parts.push('Tedarikci'); else { if(S.musteri) parts.push(S.musteri); if(S.siparis) parts.push(S.siparis); }
+    return parts.join(' - ');
+  }
+  var oldTitle = document.title;
+  window.addEventListener('beforeprint', function(){ var ad=$('#autoDate'); if(ad) ad.textContent=todayTR(); oldTitle=document.title; document.title = pdfTitle(); });
+  window.addEventListener('afterprint', function(){ document.title = oldTitle; document.body.classList.remove('supplier','noacik'); });
+  $('#btnPrint').addEventListener('click', function(){ document.body.classList.remove('supplier'); window.print(); });
+  $('#supAcik').addEventListener('change', function(e){ S.supAcik = e.target.checked; save(); });
+  $('#btnSupplier').addEventListener('click', function(){
+    document.body.classList.add('supplier');
+    document.body.classList.toggle('noacik', S.supAcik === false);
+    window.print();
+  });
+
+  $('#btnNew').addEventListener('click', function(){
+    if(!confirm('Mevcut liste temizlenip yeni liste açılsın mı? (Firma adı ve logo korunur)')) return;
+    var keep = {firma:S.firma, altbaslik:S.altbaslik, baslik:S.baslik, logo:S.logo, birim:S.birim};
+    S = Object.assign(defaults(), keep);
+    // Yeni liste, daha önce açılmış bulut kaydının üzerine yazmamalı.
+    activeCloudId = null;
+    var saved = $('#savedProjects');
+    if(saved) saved.value = '';
+    save(); render();
+    if(cloudUser) cloudMsg('Yeni liste hazır · Kaydet dediğinizde ayrı kayıt oluşturulur.');
+  });
+
+  /* ---------- WhatsApp ile PDF paylaşımı ---------- */
+  var LIB_URL = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+  var libP = null;
+  function loadLib(){
+    if(window.html2pdf) return Promise.resolve();
+    if(libP) return libP;
+    libP = new Promise(function(res,rej){
+      var sc=document.createElement('script'); sc.src=LIB_URL; sc.onload=res;
+      sc.onerror=function(){ libP=null; rej(new Error('lib')); };
+      document.head.appendChild(sc);
+    });
+    return libP;
+  }
+  setTimeout(function(){ loadLib().catch(function(){}); }, 1500);
+
+  function toast(msg,ms){
+    var t=$('#toast'); t.textContent=msg; t.style.display='block';
+    clearTimeout(toast.t); toast.t=setTimeout(function(){ t.style.display='none'; }, ms||4000);
+  }
+
+  function buildSupplierDoc(){
+    var showN = S.supAcik !== false;
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;left:-10000px;top:0;width:718px;background:#fff;color:#1c2430;font-family:"Segoe UI",Arial,sans-serif;font-size:12px';
+    var h = '<table style="width:100%;border-collapse:collapse;border-bottom:3px solid #222a3a"><tr>'+
+      (S.logo ? '<td style="width:92px;padding:0 0 10px"><img src="'+S.logo+'" style="width:80px;height:80px;object-fit:contain"></td>' : '')+
+      '<td style="font-size:26px;font-weight:800;color:#222a3a;padding:0 0 10px">'+esc(S.firma)+'</td>'+
+      '<td style="text-align:right;padding:0 0 10px;white-space:nowrap"><div style="font-size:20px;font-weight:700;letter-spacing:3px;color:#222a3a">'+esc(S.baslik)+'</div>'+
+      '<div style="color:#b3242b;font-weight:700;font-size:12px;margin-top:3px">'+todayTR()+'</div></td></tr></table>';
+    var th = 'padding:6px 4px;border:1px solid #9aa3b3;text-align:center;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#1c2330;';
+    S.bloklar.forEach(function(b){
+      var rows = b.rows.filter(function(r){ return !isEmpty(r); });
+      if(!rows.length) return;
+      h += '<table style="width:100%;border-collapse:collapse;margin-top:18px"><tr>'+
+        '<td style="background:#222a3a;color:#fff;font-weight:700;font-size:14px;padding:9px 12px;border-left:6px solid #b3242b">'+esc(b.malzeme||'—')+'</td>'+
+        '<td style="background:#b3242b;color:#fff;font-weight:700;font-size:14px;padding:9px 12px;text-align:right;width:120px">PVC '+esc(b.pvc)+'</td></tr></table>';
+      h += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #222a3a">'+
+        '<thead><tr>'+
+        '<th rowspan="2" style="'+th+'background:#cfd4dc;width:'+(showN?'8%':'11%')+'">Sıra</th>'+
+        '<th rowspan="2" style="'+th+'background:#cfd4dc">Boy ('+esc(S.birim)+')</th>'+
+        '<th rowspan="2" style="'+th+'background:#cfd4dc">En ('+esc(S.birim)+')</th>'+
+        '<th rowspan="2" style="'+th+'background:#cfd4dc;width:'+(showN?'9%':'12%')+'">Adet</th>'+
+        '<th colspan="2" style="'+th+'background:#b9c0cb">PVC '+esc(b.pvc)+'</th>'+
+        (showN?'<th rowspan="2" style="'+th+'background:#cfd4dc;width:26%">Açıklama</th>':'')+
+        '</tr><tr><th style="'+th+'background:#b9c0cb;width:'+(showN?'9%':'12%')+'">Boy</th><th style="'+th+'background:#b9c0cb;width:'+(showN?'9%':'12%')+'">En</th></tr></thead><tbody>';
+      rows.forEach(function(r,i){
+        var z = i%2===1, bg = z?'#d3d8e0':'#fff', bgs = z?'#b0b7c5':'#c3c8d3';
+        var td = 'padding:6px 4px;border:1px solid #9aa3b3;text-align:center;font-size:12px;background:'+bg+';';
+        h += '<tr style="page-break-inside:avoid">'+
+          '<td style="'+td+'background:'+bgs+';font-weight:700;font-size:11px">'+(i+1)+'</td>'+
+          '<td style="'+td+'">'+esc(r.boy)+'</td><td style="'+td+'">'+esc(r.en)+'</td><td style="'+td+'">'+esc(r.adet)+'</td>'+
+          '<td style="'+td+'">'+esc(r.pb)+'</td><td style="'+td+'">'+esc(r.pe)+'</td>'+
+          (showN?'<td style="'+td+'text-align:left;padding-left:8px">'+esc(r.not)+'</td>':'')+'</tr>';
+      });
+      h += '</tbody></table>';
+    });
+    wrap.innerHTML = h;
+    return wrap;
+  }
+
+  function makePdf(){
+    return loadLib().then(function(){
+      var el = buildSupplierDoc(); document.body.appendChild(el);
+      var opts = {margin:[10,10,14,10], image:{type:'jpeg',quality:0.95},
+        html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+        pagebreak:{mode:['css','legacy'],avoid:'tr'}};
+      return new Promise(function(resolve,reject){
+        html2pdf().set(opts).from(el).toPdf().get('pdf').then(function(pdf){
+          var n = pdf.internal.getNumberOfPages();
+          for(var i=1;i<=n;i++){ pdf.setPage(i); pdf.setFontSize(9); pdf.setTextColor(107,118,134); pdf.text('Sayfa '+i+' / '+n, 105, 290, {align:'center'}); }
+          resolve(pdf.output('blob'));
+        }).catch(reject);
+      }).then(function(b){ el.remove(); return b; }, function(e){ el.remove(); throw e; });
+    });
+  }
+
+  $('#btnWA').addEventListener('click', function(){
+    var btn=this, old=btn.textContent; btn.disabled=true; btn.textContent='Hazırlanıyor…';
+    var name = ((S.firma||'Firma')+' - Kesim Listesi - '+todayTR()).replace(/[\\/:*?"<>|]+/g,'_')+'.pdf';
+    makePdf().then(function(blob){
+      var file = new File([blob], name, {type:'application/pdf'});
+      var msg = (S.firma||'')+' - Kesim Listesi ('+todayTR()+')';
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        return navigator.share({files:[file], title:msg, text:msg}).catch(function(e){ if(!(e && e.name==='AbortError')) throw e; });
+      }
+      var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
+      window.open('https://wa.me/?text='+encodeURIComponent(msg), '_blank');
+      toast('PDF indirildi. WhatsApp açılınca sohbette ataç (📎) simgesiyle bu dosyayı ekleyin.', 8000);
+    }).catch(function(){
+      toast('PDF hazırlanamadı. İnternet bağlantınızı kontrol edin (PDF aracı internetten yüklenir).', 8000);
+    }).then(function(){ btn.disabled=false; btn.textContent=old; });
+  });
+
+
+  /* ---------- Firebase bulut kayıtları ---------- */
+  var cloudDb = null, cloudUser = null, activeCloudId = null, cloudReady = false;
+  var CUT_COLLECTION = 'acanlar_cut_projects';
+  var cloudStatus = $('#cloudStatus');
+
+  function cloudMsg(message, bad){
+    cloudStatus.textContent = message;
+    cloudStatus.style.color = bad ? '#ffb7b7' : '#dce5f5';
+  }
+  function cloudError(err){
+    var code = err && err.code ? err.code : '';
+    if(code === 'permission-denied') return 'Veritabanı erişim izni yok. Firebase kuralları kontrol edilmeli.';
+    if(code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'E-posta veya şifre hatalı.';
+    if(code === 'auth/user-not-found') return 'Bu e-posta ile hesap bulunamadı.';
+    if(code === 'auth/invalid-email') return 'E-posta adresi geçersiz.';
+    return 'Bulut işlemi başarısız: ' + (err && err.message ? err.message : 'Bilinmeyen hata');
+  }
+  function projectCollection(){
+    if(!cloudDb || !cloudUser) throw new Error('Önce atölye hesabınızla buluta bağlanın.');
+    return cloudDb.collection(CUT_COLLECTION).doc(cloudUser.uid).collection('items');
+  }
+  function projectTitle(){
+    var parts = [];
+    if(S.musteri) parts.push(S.musteri);
+    if(S.siparis) parts.push('Sipariş ' + S.siparis);
+    if(S.proje) parts.push(S.proje);
+    if(!parts.length) parts.push('Kesim Listesi');
+    return parts.join(' · ').substring(0,120);
+  }
+  function refreshCloudList(selectId){
+    if(!cloudUser) return Promise.resolve();
+    cloudMsg('Kayıtlar getiriliyor…');
+    return projectCollection().get().then(function(snap){
+      var docs = [], otherCount = 0;
+      snap.forEach(function(doc){
+        var data = doc.data() || {};
+        // Bu uygulama yalnızca kendi işaretli kayıtlarını listeler.
+        // Aynı kullanıcı altındaki başka uygulama/veri kayıtları silinmez veya değiştirilmez.
+        if(data.app === 'acanlar-kesim-listesi' && data.state && Array.isArray(data.state.bloklar)) {
+          docs.push({id:doc.id, data:data});
+        } else {
+          otherCount++;
+        }
+      });
+      docs.sort(function(a,b){ return (b.data.updatedAt||0)-(a.data.updatedAt||0); });
+      var sel = $('#savedProjects');
+      sel.innerHTML = '<option value="">Bu uygulamadaki kayıtlar ('+docs.length+')</option>';
+      docs.forEach(function(item){
+        var d = item.data;
+        var op = document.createElement('option');
+        op.value = item.id;
+        var dt = d.updatedAt ? new Date(d.updatedAt).toLocaleString('tr-TR') : '';
+        op.textContent = (d.title || 'Kesim Listesi') + (dt ? ' — '+dt : '');
+        sel.appendChild(op);
+      });
+      if(selectId) sel.value = selectId;
+      cloudMsg('☁ Buluta bağlı · '+docs.length+' kesim listesi'+(otherCount ? ' · '+otherCount+' farklı/etiketsiz kayıt gizlendi' : ''));
+    }).catch(function(e){ cloudMsg(cloudError(e),true); });
+  }
+
+  function saveCloudProject(){
+    if(!cloudUser){ alert('Önce “Buluta Bağlan” ile atölye hesabınıza giriş yapın.'); return; }
+    var btn = $('#btnCloudSave'), old = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+    var now = Date.now(), id = activeCloudId || ('cut_'+now+'_'+uid());
+    var payload = JSON.parse(JSON.stringify(S));
+    var ref = projectCollection().doc(id);
+    ref.get().then(function(existing){
+      var data = {
+        title: projectTitle(),
+        customer: S.musteri || '',
+        orderNo: S.siparis || '',
+        project: S.proje || '',
+        updatedAt: now,
+        createdAt: existing.exists ? (existing.data().createdAt || now) : now,
+        ownerUid: cloudUser.uid,
+        app: 'acanlar-kesim-listesi',
+        version: 1,
+        state: payload
+      };
+      return ref.set(data).then(function(){
+        activeCloudId = id;
+        return refreshCloudList(id);
+      });
+    }).then(function(){
+      toast('Kesim listesi veritabanına kaydedildi.',4000);
+    }).catch(function(e){ alert(cloudError(e)); cloudMsg(cloudError(e),true); })
+    .then(function(){ btn.disabled=false; btn.textContent=old; });
+  }
+
+  function loadCloudProject(){
+    var id = $('#savedProjects').value;
+    if(!id){ alert('Açmak için önce kayıtlı bir kesim listesi seçin.'); return; }
+    if(!cloudUser){ alert('Önce buluta bağlanın.'); return; }
+    if(!confirm('Mevcut ekrandaki liste, seçtiğiniz kayıtla değiştirilsin mi?')) return;
+    projectCollection().doc(id).get().then(function(doc){
+      var data = doc.exists ? (doc.data() || {}) : {};
+      if(!doc.exists || data.app !== 'acanlar-kesim-listesi' || !data.state || !Array.isArray(data.state.bloklar)){
+        throw new Error('Bu kayıt Kesim Listesi uygulamasına ait değil veya kayıt yapısı geçersiz.');
+      }
+      S = Object.assign(defaults(), data.state);
+      activeCloudId = id;
+      save(); render();
+      cloudMsg('☁ Kayıt açıldı: '+(doc.data().title || 'Kesim Listesi'));
+      toast('Kesim listesi veritabanından yüklendi.',4000);
+    }).catch(function(e){ alert(cloudError(e)); cloudMsg(cloudError(e),true); });
+  }
+
+  function deleteCloudProject(){
+    var id = $('#savedProjects').value;
+    if(!id){ alert('Silmek için önce bir kayıt seçin.'); return; }
+    if(!cloudUser){ alert('Önce buluta bağlanın.'); return; }
+    if(!confirm('Seçili kesim listesi veritabanından kalıcı olarak silinsin mi?')) return;
+    projectCollection().doc(id).get().then(function(doc){
+      var data = doc.exists ? (doc.data() || {}) : {};
+      if(!doc.exists) throw new Error('Kayıt bulunamadı.');
+      if(data.app !== 'acanlar-kesim-listesi') throw new Error('Güvenlik için yalnızca bu uygulamanın kendi kayıtları silinebilir.');
+      return projectCollection().doc(id).delete();
+    }).then(function(){
+      if(activeCloudId===id) activeCloudId=null;
+      $('#savedProjects').value = '';
+      return refreshCloudList();
+    }).then(function(){ toast('Kayıt veritabanından silindi.',4000); })
+    .catch(function(e){ alert(cloudError(e)); cloudMsg(cloudError(e),true); });
+  }
+
+  $('#btnCloudSave').addEventListener('click', saveCloudProject);
+  $('#btnCloudLoad').addEventListener('click', loadCloudProject);
+  $('#btnCloudDelete').addEventListener('click', deleteCloudProject);
+  // Açılır listede kayıt seçmek tek başına aktif kaydı değiştirmez.
+  // Aktif kayıt yalnızca 'Kaydı Aç' başarılı olduğunda belirlenir.
+  $('#savedProjects').addEventListener('change', function(){
+    // Bilerek boş bırakıldı: seçim yapmak, yanlışlıkla üzerine kaydetmeye yol açmamalı.
+  });
+
+  $('#btnCloudAccount').addEventListener('click', function(){
+    if(!window.firebase || !firebase.auth){ alert('Bulut bağlantısı henüz hazır değil. Sayfayı yenileyip tekrar deneyin.'); return; }
+    var email = prompt('Atölye hesabınızın e-posta adresi:');
+    if(!email) return;
+    var password = prompt('Atölye hesabınızın şifresi:');
+    if(!password) return;
+    firebase.auth().signInWithEmailAndPassword(email.trim(),password)
+      .catch(function(e){ alert(cloudError(e)); cloudMsg(cloudError(e),true); });
+  });
+  $('#btnCloudLogout').addEventListener('click', function(){
+    if(window.firebase && firebase.auth) firebase.auth().signOut();
+  });
+
+  window.startCutListCloud = function(){
+    try{
+      if(!window.firebase) throw new Error('Firebase kitaplığı yüklenemedi.');
+      if(!firebase.apps.length){
+        firebase.initializeApp({
+          apiKey:'AIzaSyB3Pfgk5Z8x4c95BqfPcnNZHNYQ01pQpSU',
+          authDomain:'oykum-6de70.firebaseapp.com',
+          projectId:'oykum-6de70',
+          storageBucket:'oykum-6de70.firebasestorage.app',
+          messagingSenderId:'908914397464',
+          appId:'1:908914397464:web:63bcd5f48fcce81cf2ce6d',
+          measurementId:'G-YELP0PH5ZW'
+        });
+      }
+      cloudDb = firebase.firestore();
+      firebase.auth().onAuthStateChanged(function(user){
+        cloudUser = user || null;
+        cloudReady = !!user;
+        $('#btnCloudAccount').style.display = user ? 'none' : '';
+        $('#btnCloudLogout').style.display = user ? '' : 'none';
+        $('#btnCloudSave').disabled = !user;
+        $('#btnCloudLoad').disabled = !user;
+        $('#btnCloudDelete').disabled = !user;
+        if(user){
+          cloudMsg('☁ Atölye hesabı bağlı · kayıtlar eşitleniyor…');
+          refreshCloudList(activeCloudId);
+        }else{
+          $('#savedProjects').innerHTML = '<option value="">Kayıtlı kesim listeleri</option>';
+          cloudMsg('Buluta bağlanılmadı · cihaz içi taslak aktif');
+        }
+      });
+    }catch(e){ cloudMsg(cloudError(e),true); }
+  };
+
+  // Sayfa açılışında yerel taslak korunur; bulut hesabı ayrıca bağlanır.
+  $('#btnCloudSave').disabled = true;
+  $('#btnCloudLoad').disabled = true;
+  $('#btnCloudDelete').disabled = true;
+  render();
+})();
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer onload="startCutListCloud()"></script>
+</body>
+</html>
