@@ -64,6 +64,9 @@ input,select,textarea{font:inherit;color:inherit}
 .blok-head .pvcwrap select:hover,.blok-head .pvcwrap select:focus{background:rgba(255,255,255,.5) !important}
 .blok-head .x{background:transparent;border:0;color:#fff;opacity:.6;cursor:pointer;font-size:18px;padding:0 4px}
 .blok-head .x:hover{opacity:1}
+.blok-head .note-toggle{flex:none;border:1px solid rgba(255,255,255,.38);background:rgba(255,255,255,.08);color:#fff;border-radius:6px;padding:5px 8px;font:inherit;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.blok-head .note-toggle:hover{background:rgba(255,255,255,.18)}
+.blok.no-notes table.kesim col.aciklama,.blok.no-notes table.kesim th.aciklama,.blok.no-notes table.kesim td.aciklama{display:none !important}
 
 table.kesim{width:100%;border-collapse:collapse;table-layout:fixed;border:1px solid var(--navy)}
 table.kesim th{background:#e4eaf3;color:var(--navy);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:6px 4px;border:1px solid var(--line);text-align:center}
@@ -177,8 +180,11 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
   .head .baslik input{text-align:left;font-size:17px;letter-spacing:2px}
   .info{grid-template-columns:1fr}
   .info .cell,.info .cell.wide,.info .cell.full{grid-column:auto;border-right:0}
-  .blok-head{flex-wrap:wrap}
-  .blok-head input{font-size:14px}
+  .blok-head{flex-wrap:wrap;gap:6px}
+  .blok-head input{font-size:14px;min-width:100px;flex:1 1 100%}
+  .blok-head .pvcwrap{margin-left:0;padding:4px 8px;font-size:12px}
+  .blok-head .note-toggle{font-size:11px;padding:6px 8px;flex:1 1 auto}
+  .blok-head .x{margin-left:auto}
   .sheet input,.sheet select,.sheet textarea{font-size:16px}
   table.kesim td{height:42px}
   table.kesim td input,table.kesim td select{height:40px}
@@ -251,7 +257,7 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
   var newRow = function(){ return {boy:'',en:'',adet:'',pb:'',pe:'',not:''}; };
   var newBlock = function(m,p){
     var rows=[]; for(var i=0;i<12;i++) rows.push(newRow());
-    return {id:uid(), malzeme:m||'', pvc:p||'0,40', rows:rows};
+    return {id:uid(), malzeme:m||'', pvc:p||'0,40', showNotes:true, rows:rows};
   };
   var today = function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
   var todayTR = function(){ var d=new Date(); return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); };
@@ -259,14 +265,26 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
     return {
       firma:'ACANLAR MOBİLYA', altbaslik:'', baslik:'KESİM LİSTESİ',
       musteri:'', siparis:'', tarih:today(), proje:'', birim:'cm', not:'', logo:DEFAULT_LOGO, showEmpty:false, supAcik:true,
-      bloklar:[ newBlock('PARLAK BEYAZ SUNTA','0,40') ]
+      bloklar:[ newBlock('','0,40') ]
     };
   };
-  var S;
+  var PREF_KEY = 'kesimListesi.prefs.v1';
+  var previousDraft = null, prefs = null;
   document.getElementById('brandLogo').src = DEFAULT_LOGO;
-  try { var raw = localStorage.getItem(KEY); S = raw ? JSON.parse(raw) : null; } catch(e){ S = null; }
-  if(!S || !Array.isArray(S.bloklar)) S = defaults();
+  try { previousDraft = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){ previousDraft = null; }
+  try { prefs = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); } catch(e){ prefs = null; }
+  // Eski sürümde tercihler yalnızca taslak içinde tutuluyordu. Bunları bir kez taşı,
+  // fakat son kesim listesini otomatik açma: her yeni oturum temiz listeyle başlasın.
+  if(!prefs && previousDraft){
+    prefs = {firma:previousDraft.firma,altbaslik:previousDraft.altbaslik,baslik:previousDraft.baslik,logo:previousDraft.logo,birim:previousDraft.birim,supAcik:previousDraft.supAcik};
+  }
+  var S = defaults();
+  if(prefs){
+    ['firma','altbaslik','baslik','logo','birim','supAcik'].forEach(function(k){ if(prefs[k] !== undefined && prefs[k] !== null) S[k] = prefs[k]; });
+  }
   if(!S.logo) S.logo = DEFAULT_LOGO;
+  S.bloklar.forEach(function(b){ if(b.showNotes === undefined) b.showNotes = true; });
+  var preparedFiles = {supplier:null, full:null};
 
   var $ = function(s,ctx){ return (ctx||document).querySelector(s); };
   var esc = function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
@@ -275,9 +293,21 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
   var isEmpty = function(r){ return !(r.boy||r.en||r.adet||r.pb||r.pe||r.not); };
 
   var saveT;
+  function clearPreparedFiles(){
+    preparedFiles.supplier = null; preparedFiles.full = null;
+    var wa=$('#btnWA'), sup=$('#btnSupplier');
+    if(wa){ wa.dataset.ready=''; wa.textContent="WhatsApp'a Gönder"; }
+    if(sup){ sup.dataset.ready=''; sup.textContent='Tedarikçiye Gönder'; }
+  }
   function save(){
     clearTimeout(saveT);
-    saveT = setTimeout(function(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }, 250);
+    clearPreparedFiles();
+    saveT = setTimeout(function(){
+      try{
+        localStorage.setItem(KEY, JSON.stringify(S));
+        localStorage.setItem(PREF_KEY, JSON.stringify({firma:S.firma,altbaslik:S.altbaslik,baslik:S.baslik,logo:S.logo,birim:S.birim,supAcik:S.supAcik}));
+      }catch(e){}
+    }, 250);
   }
 
   function rowHTML(bi, ri, r){
@@ -309,11 +339,12 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
   }
   function blockHTML(b, bi){
     var rows = b.rows.map(function(r,ri){ return rowHTML(bi,ri,r); }).join('');
-    return '<section class="blok" data-blok="'+bi+'">'+
+    return '<section class="blok'+(b.showNotes===false?' no-notes':'')+'" data-blok="'+bi+'">'+
       '<div class="blok-head">'+
         '<span class="tag">Malzeme</span>'+
         '<input type="text" data-bm="'+bi+'" value="'+esc(b.malzeme)+'" placeholder="Malzeme / Renk (ör. PARLAK BEYAZ SUNTA)">'+
         '<span class="pvcwrap">PVC <select data-bp="'+bi+'">'+pvcOptions(b.pvc)+'</select></span>'+
+        '<button type="button" class="note-toggle noprint" data-toggle-notes="'+bi+'">Açıklama: '+(b.showNotes===false?'Gizli':'Açık')+'</button>'+
         '<button class="x noprint" type="button" data-delblok="'+bi+'" title="Bu malzeme bölümünü sil">✕</button>'+
       '</div>'+
       '<table class="kesim">'+
@@ -324,7 +355,9 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
           '<tr><th class="grp">Boy</th><th class="grp">En</th></tr>'+
         '</thead>'+
         '<tbody>'+rows+'</tbody>'+
-        '<tfoot><tr><td colspan="3" style="text-align:right">TOPLAM</td><td data-t="adet"></td><td colspan="2" data-t="m2"></td><td data-t="pvc"></td><td class="del" style="border:0;background:#fff"></td></tr></tfoot>'+
+        (b.showNotes===false
+          ? '<tfoot><tr><td colspan="3" style="text-align:right">TOPLAM · PVC <span data-t="pvc"></span></td><td data-t="adet"></td><td colspan="2" data-t="m2"></td><td class="del" style="border:0;background:#fff"></td></tr></tfoot>'
+          : '<tfoot><tr><td colspan="3" style="text-align:right">TOPLAM</td><td data-t="adet"></td><td colspan="2" data-t="m2"></td><td data-t="pvc"></td><td class="del" style="border:0;background:#fff"></td></tr></tfoot>')+
       '</table>'+
       '<button type="button" class="addrow" data-addrow="'+bi+'">+ Satır ekle</button>'+
       '<div class="dupwarn noprint" data-dup></div>'+
@@ -472,6 +505,7 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
   root.addEventListener('click', function(e){
     var t = e.target;
     if(t.closest('#logoBox')){ $('#fileLogo').click(); return; }
+    if(t.dataset.toggleNotes!==undefined){ var nbi=+t.dataset.toggleNotes; S.bloklar[nbi].showNotes = S.bloklar[nbi].showNotes===false; save(); render(); return; }
     if(t.id==='addBlok'){ S.bloklar.push(newBlock('', '0,40')); save(); render(); return; }
     if(t.dataset.addrow!==undefined){ addRow(+t.dataset.addrow,true); return; }
     if(t.dataset.del){
@@ -502,17 +536,29 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
   var oldTitle = document.title;
   window.addEventListener('beforeprint', function(){ var ad=$('#autoDate'); if(ad) ad.textContent=todayTR(); oldTitle=document.title; document.title = pdfTitle(); });
   window.addEventListener('afterprint', function(){ document.title = oldTitle; document.body.classList.remove('supplier','noacik'); });
-  $('#btnPrint').addEventListener('click', function(){ document.body.classList.remove('supplier'); window.print(); });
+  function isMobileLayout(){
+    return window.matchMedia('(max-width:760px)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  }
+  $('#btnPrint').addEventListener('click', function(){
+    document.body.classList.remove('supplier','noacik');
+    if(isMobileLayout()){ createPdf('full', this, 'download'); return; }
+    window.print();
+  });
   $('#supAcik').addEventListener('change', function(e){ S.supAcik = e.target.checked; save(); });
   $('#btnSupplier').addEventListener('click', function(){
-    document.body.classList.add('supplier');
-    document.body.classList.toggle('noacik', S.supAcik === false);
-    window.print();
+    if(!isMobileLayout()){
+      document.body.classList.add('supplier');
+      document.body.classList.toggle('noacik', S.supAcik === false);
+      window.print();
+      return;
+    }
+    if(preparedFiles.supplier){ sharePreparedPdf('supplier', this, false); return; }
+    createPdf('supplier', this, 'share');
   });
 
   $('#btnNew').addEventListener('click', function(){
     if(!confirm('Mevcut liste temizlenip yeni liste açılsın mı? (Firma adı ve logo korunur)')) return;
-    var keep = {firma:S.firma, altbaslik:S.altbaslik, baslik:S.baslik, logo:S.logo, birim:S.birim};
+    var keep = {firma:S.firma, altbaslik:S.altbaslik, baslik:S.baslik, logo:S.logo, birim:S.birim, supAcik:S.supAcik};
     S = Object.assign(defaults(), keep);
     // Yeni liste, daha önce açılmış bulut kaydının üzerine yazmamalı.
     activeCloudId = null;
@@ -522,7 +568,7 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
     if(cloudUser) cloudMsg('Yeni liste hazır · Kaydet dediğinizde ayrı kayıt oluşturulur.');
   });
 
-  /* ---------- WhatsApp ile PDF paylaşımı ---------- */
+  /* ---------- Mobil uyumlu, optimize PDF ve dosya paylaşımı ---------- */
   var LIB_URL = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
   var libP = null;
   function loadLib(){
@@ -530,22 +576,34 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
     if(libP) return libP;
     libP = new Promise(function(res,rej){
       var sc=document.createElement('script'); sc.src=LIB_URL; sc.onload=res;
-      sc.onerror=function(){ libP=null; rej(new Error('lib')); };
+      sc.onerror=function(){ libP=null; rej(new Error('PDF aracı yüklenemedi')); };
       document.head.appendChild(sc);
     });
     return libP;
   }
-  setTimeout(function(){ loadLib().catch(function(){}); }, 1500);
+  // Kitaplığı önceden yükle; kullanıcı dokunuşu PDF hazırlanırken kaybolmasın.
+  setTimeout(function(){ loadLib().catch(function(){}); }, 700);
 
   function toast(msg,ms){
     var t=$('#toast'); t.textContent=msg; t.style.display='block';
-    clearTimeout(toast.t); toast.t=setTimeout(function(){ t.style.display='none'; }, ms||4000);
+    clearTimeout(toast.t); toast.t=setTimeout(function(){ t.style.display='none'; }, ms||5000);
+  }
+  function formatBytes(bytes){
+    if(bytes < 1024) return bytes+' B';
+    if(bytes < 1024*1024) return (bytes/1024).toFixed(0)+' KB';
+    return (bytes/(1024*1024)).toFixed(2)+' MB';
+  }
+  function safeFileName(text){ return String(text||'Kesim Listesi').replace(/[\\/:*?"<>|]+/g,'_').replace(/\s+/g,' ').trim(); }
+  function makeFileName(kind){
+    var suffix = kind==='supplier' ? 'Tedarikci Kesim Listesi' : 'Kesim Listesi';
+    var who = S.musteri ? ' - '+S.musteri : '';
+    var order = S.siparis ? ' - '+S.siparis : '';
+    return safeFileName((S.firma||'Firma')+who+order+' - '+suffix+' - '+todayTR())+'.pdf';
   }
 
   function buildSupplierDoc(){
-    var showN = S.supAcik !== false;
     var wrap = document.createElement('div');
-    wrap.style.cssText = 'width:718px;background:#fff;color:#1c2430;font-family:"Segoe UI",Arial,sans-serif;font-size:12px';
+    wrap.style.cssText = 'width:718px;background:#fff;color:#1c2430;font-family:"Segoe UI",Arial,sans-serif;font-size:12px;padding:0';
     var h = '<table style="width:100%;border-collapse:collapse;border-bottom:3px solid #222a3a"><tr>'+
       (S.logo ? '<td style="width:92px;padding:0 0 10px"><img src="'+S.logo+'" style="width:80px;height:80px;object-fit:contain"></td>' : '')+
       '<td style="font-size:26px;font-weight:800;color:#222a3a;padding:0 0 10px">'+esc(S.firma)+'</td>'+
@@ -555,6 +613,7 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
     S.bloklar.forEach(function(b){
       var rows = b.rows.filter(function(r){ return !isEmpty(r); });
       if(!rows.length) return;
+      var showN = S.supAcik !== false && b.showNotes !== false;
       h += '<table style="width:100%;border-collapse:collapse;margin-top:18px"><tr>'+
         '<td style="background:#222a3a;color:#fff;font-weight:700;font-size:14px;padding:9px 12px;border-left:6px solid #b3242b">'+esc(b.malzeme||'—')+'</td>'+
         '<td style="background:#b3242b;color:#fff;font-weight:700;font-size:14px;padding:9px 12px;text-align:right;width:120px">PVC '+esc(b.pvc)+'</td></tr></table>';
@@ -582,49 +641,159 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
     return wrap;
   }
 
-  function makePdf(){
+  function buildFullDoc(){
+    var clone = $('#root').cloneNode(true);
+    clone.id = 'pdfExportRoot';
+    clone.style.cssText = 'width:718px;max-width:none;margin:0;padding:28px 30px 34px;min-height:0;background:#fff;box-shadow:none;border:0;border-radius:0';
+    clone.querySelectorAll('.noprint,.addrow,.addblok,.dupwarn,.del,.col-del').forEach(function(el){ el.remove(); });
+    clone.querySelectorAll('.info .cell.noval,.not-box.hide-print').forEach(function(el){ el.remove(); });
+    if(!S.showEmpty) clone.querySelectorAll('tr.empty').forEach(function(el){ el.remove(); });
+    clone.querySelectorAll('input,select,textarea').forEach(function(el){
+      var span = document.createElement('span');
+      var cs = window.getComputedStyle(el);
+      for(var i=0;i<cs.length;i++){
+        var prop=cs[i];
+        try{ span.style.setProperty(prop,cs.getPropertyValue(prop),cs.getPropertyPriority(prop)); }catch(e){}
+      }
+      Object.keys(el.dataset || {}).forEach(function(k){ span.dataset[k]=el.dataset[k]; });
+      span.className = el.className || '';
+      span.textContent = el.tagName==='SELECT' ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '') : el.value;
+      span.style.display = el.tagName==='TEXTAREA' ? 'block' : (cs.display==='inline'?'inline-block':'block');
+      span.style.whiteSpace = el.tagName==='TEXTAREA' ? 'pre-wrap' : 'normal';
+      span.style.overflowWrap = 'anywhere';
+      span.style.minHeight = el.tagName==='TEXTAREA' ? '42px' : span.style.minHeight;
+      el.replaceWith(span);
+    });
+    var wrap=document.createElement('div');
+    wrap.className='pdf-export';
+    wrap.style.cssText='width:718px;background:#fff;padding:0;margin:0 auto';
+    var pdfStyle=document.createElement('style');
+    pdfStyle.textContent = '.pdf-export .head{flex-wrap:nowrap!important;gap:20px!important}'+
+      '.pdf-export .logo-box{width:96px!important;height:96px!important}'+
+      '.pdf-export .head .firma{flex:1 1 0!important;min-width:0!important}'+
+      '.pdf-export .head .baslik{flex:0 0 250px!important;text-align:right!important}'+
+      '.pdf-export .head .firma [data-top="firma"]{font-size:28px!important;font-weight:800!important;color:#222a3a!important;letter-spacing:1.5px!important}'+
+      '.pdf-export .head .firma .alt [data-top="altbaslik"]{font-size:12px!important;font-weight:500!important;color:#6b7686!important}'+
+      '.pdf-export .head .baslik [data-top="baslik"]{font-size:22px!important;font-weight:700!important;text-align:right!important;letter-spacing:3px!important;color:#222a3a!important}'+
+      '.pdf-export .info{grid-template-columns:repeat(4,1fr)!important}'+
+      '.pdf-export .info .cell.wide{grid-column:span 2!important}'+
+      '.pdf-export .info .cell.full{grid-column:1/-1!important}'+
+      '.pdf-export .blok-head{flex-wrap:nowrap!important;gap:10px!important}'+
+      '.pdf-export .blok-head [data-bm]{flex:1 1 0!important;min-width:0!important;width:auto!important;font-size:15px!important;font-weight:700!important;color:#fff!important}'+
+      '.pdf-export .blok-head .pvcwrap{margin-left:auto!important}'+
+      '.pdf-export .col-sira{width:9%!important}.pdf-export .col-boy,.pdf-export .col-en{width:15%!important}.pdf-export .col-adet{width:10%!important}.pdf-export .col-pvc{width:10%!important}.pdf-export .col-del{width:26px!important}'+
+      '.pdf-export table.kesim td span[data-f]{height:auto!important;min-height:24px!important;padding:2px 4px!important;font-size:12px!important;line-height:20px!important}'+
+      '.pdf-export .sheet{width:718px!important;max-width:none!important;min-height:0!important;margin:0!important;padding:28px 30px 34px!important;box-shadow:none!important;border:0!important;border-radius:0!important}';
+    wrap.appendChild(pdfStyle);
+    wrap.appendChild(clone);
+    return wrap;
+  }
+
+  function makePdf(kind){
     return loadLib().then(function(){
-      var el = buildSupplierDoc();
-      window.scrollTo(0,0);
+      var el = kind==='supplier' ? buildSupplierDoc() : buildFullDoc();
       var imgs = Array.prototype.slice.call(el.querySelectorAll('img')).map(function(im){
-        return new Promise(function(r){ if(im.complete) r(); else { im.onload=r; im.onerror=r; } });
+        return new Promise(function(resolve){
+          if(im.complete && im.naturalWidth) resolve();
+          else { im.onload=resolve; im.onerror=resolve; }
+        });
       });
       return Promise.all(imgs).then(function(){
-      var rowCount = 0; S.bloklar.forEach(function(b){ rowCount += b.rows.filter(function(r){ return !isEmpty(r); }).length + 3; });
-      var big = rowCount > 110;                 // çok uzun listede tarayıcı belleğini korumak için
-      var scl = big ? 2.5 : (rowCount > 60 ? 3 : 4);
-      var opts = {margin:[10,10,14,10], image:{type: big ? 'jpeg' : 'png', quality:0.99},
-        html2canvas:{scale:scl,useCORS:true,backgroundColor:'#ffffff',letterRendering:true},
-        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-        pagebreak:{mode:['css','legacy'],avoid:'tr'}};
-      return new Promise(function(resolve,reject){
-        html2pdf().set(opts).from(el).toPdf().get('pdf').then(function(pdf){
-          var n = pdf.internal.getNumberOfPages();
-          for(var i=1;i<=n;i++){ pdf.setPage(i); pdf.setFontSize(9); pdf.setTextColor(107,118,134); pdf.text('Sayfa '+i+' / '+n, 105, 290, {align:'center'}); }
-          resolve(pdf.output('blob'));
-        }).catch(reject);
-      });
+        var rowCount=0;
+        S.bloklar.forEach(function(b){ rowCount += b.rows.filter(function(r){ return !isEmpty(r); }).length; });
+        // 4x PNG, 40 MB+ dosyalara neden oluyordu. 2.1–2.6x kaliteli JPEG,
+        // yazıyı yakınlaştırınca okunaklı tutarken dosya boyutunu ciddi azaltır.
+        var scale = rowCount>100 ? 2.10 : (rowCount>45 ? 2.35 : 2.65);
+        function renderAt(targetScale,quality){
+          var opts = {
+            margin:[9,9,13,9],
+            image:{type:'jpeg',quality:quality},
+            html2canvas:{scale:targetScale,useCORS:true,backgroundColor:'#ffffff',letterRendering:true,logging:false},
+            jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true},
+            pagebreak:{mode:['css','legacy'],avoid:['tr']}
+          };
+          return html2pdf().set(opts).from(el).toPdf().get('pdf').then(function(pdf){
+            var n=pdf.internal.getNumberOfPages();
+            for(var i=1;i<=n;i++){
+              pdf.setPage(i); pdf.setFontSize(9); pdf.setTextColor(107,118,134);
+              pdf.text('Sayfa '+i+' / '+n,105,290,{align:'center'});
+            }
+            return {blob:pdf.output('blob'),pages:n};
+          });
+        }
+        return renderAt(scale,0.92).then(function(result){
+          // Tek sayfalık çıktı 2 MB'ı aşarsa netliği koruyacak hafif bir ikinci sıkıştırma uygula.
+          if(result.pages===1 && result.blob.size>2*1024*1024){
+            return renderAt(2.15,0.88).then(function(compact){ return compact.blob; });
+          }
+          return result.blob;
+        });
       });
     });
   }
 
-  $('#btnWA').addEventListener('click', function(){
-    var btn=this, old=btn.textContent; btn.disabled=true; btn.textContent='Hazırlanıyor…';
-    var name = ((S.firma||'Firma')+' - Kesim Listesi - '+todayTR()).replace(/[\\/:*?"<>|]+/g,'_')+'.pdf';
-    makePdf().then(function(blob){
-      var file = new File([blob], name, {type:'application/pdf'});
-      var msg = (S.firma||'')+' - Kesim Listesi ('+todayTR()+')';
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        return navigator.share({files:[file], title:msg, text:msg}).catch(function(e){ if(!(e && e.name==='AbortError')) throw e; });
+  function downloadPdf(file){
+    var url=URL.createObjectURL(file), a=document.createElement('a');
+    a.href=url; a.download=file.name; a.rel='noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); },60000);
+  }
+  function sharePreparedPdf(kind,btn,forceWhatsApp){
+    var file=preparedFiles[kind];
+    if(!file){ createPdf(kind,btn,forceWhatsApp?'share':'share'); return; }
+    var msg=(S.firma||'ACANLAR MOBİLYA')+' - Kesim Listesi ('+todayTR()+')';
+    // Web Share çağrısı, dosya hazırlandıktan sonraki gerçek kullanıcı dokunuşunda
+    // doğrudan yapılır. Böylece Android/iOS paylaşım izni kaybolmaz.
+    var supportsFileShare=false;
+    try{ supportsFileShare=!!(navigator.share && navigator.canShare && navigator.canShare({files:[file]})); }catch(e){ supportsFileShare=false; }
+    if(supportsFileShare){
+      var sharePromise;
+      try{ sharePromise=navigator.share({files:[file],title:msg,text:msg}); }
+      catch(err){ toast('Paylaşım ekranı açılamadı. PDF dosyasını indirmeyi deneyin.',7000); return; }
+      Promise.resolve(sharePromise).then(function(){ toast('Dosya paylaşım ekranına aktarıldı.',4500); })
+        .catch(function(err){
+          if(err && err.name==='AbortError') return;
+          toast('Telefon paylaşımı tamamlayamadı. PDF indirildi; WhatsApp’ta ataç simgesiyle ekleyin.',9000);
+          downloadPdf(file);
+        });
+      return;
+    }
+    if(forceWhatsApp) window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+    downloadPdf(file);
+    if(forceWhatsApp){
+      toast('PDF indirildi. WhatsApp’ta sohbeti açıp ataç simgesiyle indirilen PDF’yi ekleyin.',9000);
+    }else{
+      toast('PDF indirildi. Dosyayı telefonunuzdaki paylaş menüsünden tedarikçiye iletebilirsiniz.',8000);
+    }
+  }
+
+  function createPdf(kind,btn,afterCreate){
+    var old=btn.textContent;
+    btn.disabled=true; btn.textContent='PDF hazırlanıyor…';
+    makePdf(kind).then(function(blob){
+      var fileName=makeFileName(kind), file;
+      if(typeof File==='function') file=new File([blob],fileName,{type:'application/pdf'});
+      else { file=blob; try{ file.name=fileName; }catch(e){} }
+      preparedFiles[kind]=file;
+      if(kind==='supplier'){
+        $('#btnSupplier').dataset.ready='1'; $('#btnSupplier').textContent='PDF hazır · Paylaş';
+        $('#btnWA').dataset.ready='1'; $('#btnWA').textContent='WhatsApp’ta Paylaş';
       }
-      var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
-      window.open('https://wa.me/?text='+encodeURIComponent(msg), '_blank');
-      toast('PDF indirildi. WhatsApp açılınca sohbette ataç (📎) simgesiyle bu dosyayı ekleyin.', 8000);
-    }).catch(function(){
-      toast('PDF hazırlanamadı. İnternet bağlantınızı kontrol edin (PDF aracı internetten yüklenir).', 8000);
-    }).then(function(){ btn.disabled=false; btn.textContent=old; });
+      if(kind==='full'){
+        downloadPdf(file);
+        toast('PDF indirildi · '+formatBytes(file.size)+' · Yazılar netliği korunarak sıkıştırıldı.',8000);
+      }else{
+        toast('Tedarikçi PDF’si hazır ('+formatBytes(file.size)+'). Göndermek için “PDF hazır · Paylaş” veya WhatsApp düğmesine tekrar dokunun.',9000);
+      }
+    }).catch(function(err){
+      console.error('PDF oluşturma hatası:',err);
+      toast('PDF oluşturulamadı. İnternet bağlantısını kontrol edip tekrar deneyin.',8000);
+    }).then(function(){ btn.disabled=false; if(!preparedFiles[kind]) btn.textContent=old; });
+  }
+
+  $('#btnWA').addEventListener('click', function(){
+    if(preparedFiles.supplier){ sharePreparedPdf('supplier',this,true); return; }
+    createPdf('supplier',this,'share');
   });
 
 
@@ -729,6 +898,7 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
         throw new Error('Bu kayıt Kesim Listesi uygulamasına ait değil veya kayıt yapısı geçersiz.');
       }
       S = Object.assign(defaults(), data.state);
+      S.bloklar.forEach(function(b){ if(b.showNotes === undefined) b.showNotes = true; });
       activeCloudId = id;
       save(); render();
       cloudMsg('☁ Kayıt açıldı: '+(doc.data().title || 'Kesim Listesi'));
@@ -810,7 +980,7 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
     }catch(e){ cloudMsg(cloudError(e),true); }
   };
 
-  // Sayfa açılışında yerel taslak korunur; bulut hesabı ayrıca bağlanır.
+  // Her yeni oturum boş listeyle başlar; eski kesimler yalnızca veritabanından açılır.
   $('#btnCloudSave').disabled = true;
   $('#btnCloudLoad').disabled = true;
   $('#btnCloudDelete').disabled = true;
