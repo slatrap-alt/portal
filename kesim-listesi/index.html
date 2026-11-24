@@ -222,27 +222,72 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
   body.supplier.noacik .aciklama{display:none !important}
   body.supplier .info,body.supplier .ozet,body.supplier .not-box,body.supplier .imza,body.supplier tfoot{display:none !important}
 }
+
+/* ---------- Kompakt araç çubuğu ---------- */
+.toolbar{gap:14px;padding:8px 14px;align-items:center}
+.toolbar .brand{flex:0 0 auto;margin-right:0}
+.toolbar-main{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+.tool-group{display:flex;align-items:center;gap:5px;padding-left:10px;border-left:1px solid rgba(255,255,255,.18)}
+.tool-group:first-child{padding-left:0;border-left:0}
+.toolbar .icon-btn{width:38px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:18px;line-height:1;border-radius:8px;flex:0 0 auto}
+.toolbar .icon-btn.primary{color:#fff}
+.toolbar .danger-btn:hover{background:rgba(220,70,70,.22);border-color:#e58a8a}
+.toolbar .project-select{width:190px;max-width:190px;height:36px;padding:0 8px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toolbar .cloud-status{font-size:11px;color:#dce5f5;min-width:110px;max-width:165px;line-height:1.25}
+.toolbar label.opt{font-size:11px;white-space:nowrap;gap:4px}
+.toolbar label.opt input{margin:0}
+@media(max-width:1100px){
+  .toolbar{align-items:flex-start}
+  .toolbar-main{justify-content:flex-start}
+  .tool-group{padding-left:7px}
+  .toolbar .cloud-status{max-width:130px}
+}
+@media(max-width:760px){
+  .toolbar{position:static;padding:8px 10px;gap:8px}
+  .toolbar .brand{flex:1 1 100%}
+  .toolbar-main{width:100%;justify-content:flex-start;gap:7px}
+  .tool-group{padding-left:7px}
+  .toolbar .icon-btn{width:40px;height:40px;font-size:19px}
+  .toolbar .project-select{width:min(48vw,210px);max-width:min(48vw,210px);height:40px;flex:0 1 auto}
+  .toolbar .cloud-status{flex:1 1 100%;max-width:none;min-width:0;padding:2px 0}
+  .option-tools{flex:1 1 100%;border-left:0;padding-left:0;flex-wrap:wrap}
+}
+
 </style>
 </head>
 <body>
 
 <div class="toolbar">
   <div class="brand"><span class="blogo"><img id="brandLogo" alt=""></span><span class="btxt"><b>ACANLAR MOBİLYA</b><small>Kesim Listesi Programı</small></span></div>
-  <label class="opt"><input type="checkbox" id="showEmpty"> Boş satırları da yazdır</label>
-  <button class="btn primary" id="btnCloudSave">☁ Veritabanına Kaydet</button>
-  <select id="savedProjects" class="btn" style="max-width:230px;background:#fff;color:#222a3a;border-color:#9aa3b3">
-    <option value="">Kayıtlı kesim listeleri</option>
-  </select>
-  <button class="btn" id="btnCloudLoad">Kaydı Aç</button>
-  <button class="btn" id="btnCloudDelete">Kaydı Sil</button>
-  <button class="btn" id="btnNew">Yeni liste</button>
-  <button class="btn" id="btnCloudAccount">Buluta Bağlan</button>
-  <button class="btn" id="btnCloudLogout" style="display:none">Çıkış</button>
-  <span id="cloudStatus" style="font-size:12px;color:#dce5f5;min-width:130px">Bulut bağlantısı bekleniyor</span>
-  <label class="opt" title="Tedarikçiye Gönder çıktısında Açıklama sütunu"><input type="checkbox" id="supAcik"> Tedarikçi çıktısında açıklamalar</label>
-  <button class="btn" id="btnSupplier">Tedarikçiye Gönder</button>
-  <button class="btn wa" id="btnWA" title="Tedarikçi çıktısını PDF olarak WhatsApp ile paylaş">WhatsApp'a Gönder</button>
-  <button class="btn primary" id="btnPrint">PDF / Yazdır</button>
+
+  <div class="toolbar-main">
+    <div class="tool-group project-tools" aria-label="Kesim listesi işlemleri">
+      <button class="btn primary icon-btn" id="btnCloudSave" title="Veritabanına kaydet" aria-label="Veritabanına kaydet">☁</button>
+      <select id="savedProjects" class="btn project-select" title="Kayıtlı kesim listeleri" aria-label="Kayıtlı kesim listeleri" style="background:#fff;color:#222a3a;border-color:#9aa3b3">
+        <option value="">Kayıtlı kesim listeleri</option>
+      </select>
+      <button class="btn icon-btn" id="btnCloudLoad" title="Seçili kaydı aç" aria-label="Seçili kaydı aç">📂</button>
+      <button class="btn icon-btn danger-btn" id="btnCloudDelete" title="Seçili kaydı sil" aria-label="Seçili kaydı sil">🗑</button>
+      <button class="btn icon-btn" id="btnNew" title="Yeni kesim listesi" aria-label="Yeni kesim listesi">＋</button>
+    </div>
+
+    <div class="tool-group cloud-tools" aria-label="Bulut hesabı">
+      <button class="btn icon-btn" id="btnCloudAccount" title="Bulut hesabına bağlan" aria-label="Bulut hesabına bağlan">☁↗</button>
+      <button class="btn icon-btn" id="btnCloudLogout" title="Bulut hesabından çıkış" aria-label="Bulut hesabından çıkış" style="display:none">⇥</button>
+      <span id="cloudStatus" class="cloud-status">Bulut bağlantısı bekleniyor</span>
+    </div>
+
+    <div class="tool-group output-tools" aria-label="Çıktı işlemleri">
+      <button class="btn icon-btn" id="btnSupplier" title="Tedarikçiye gönder" aria-label="Tedarikçiye gönder">▤</button>
+      <button class="btn wa icon-btn" id="btnWA" title="Tedarikçi PDF'sini WhatsApp ile paylaş" aria-label="WhatsApp ile paylaş">↗</button>
+      <button class="btn primary icon-btn" id="btnPrint" title="PDF oluştur / yazdır" aria-label="PDF oluştur / yazdır">🖨</button>
+    </div>
+
+    <div class="tool-group option-tools" aria-label="Görünüm ve çıktı seçenekleri">
+      <label class="opt" title="Boş satırları da yazdır"><input type="checkbox" id="showEmpty"> Boş satırlar</label>
+      <label class="opt" title="Tedarikçiye gönder çıktısında açıklama sütununu göster"><input type="checkbox" id="supAcik"> Açıklamalar</label>
+    </div>
+  </div>
   <input type="file" id="fileLogo" accept="image/*" hidden>
 </div>
 
