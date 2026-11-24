@@ -263,6 +263,8 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
 /* İşlem simgeleri: WhatsApp, PDF ve tedarikçi mesajı */
 .toolbar .wa.icon-btn{color:#25d366;border-color:#25d366}
 .toolbar .wa.icon-btn svg{display:block}
+.toolbar .output-tools .icon-btn.is-loading{opacity:.65;cursor:wait;animation:toolbarPulse .9s ease-in-out infinite alternate}
+@keyframes toolbarPulse{from{filter:brightness(1)}to{filter:brightness(1.55)}}
 .toolbar .pdf-btn{width:42px;color:#ff737b}
 .toolbar .pdf-btn:hover{color:#ff9298;background:rgba(255,105,115,.12);border-color:#ff737b}
 .toolbar .pdf-icon{display:block;width:25px;height:25px;overflow:visible}
@@ -827,27 +829,44 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
   }
 
   function createPdf(kind,btn,afterCreate){
-    var old=btn.textContent;
-    btn.disabled=true; btn.textContent='PDF hazırlanıyor…';
+    // Simge butonlarında textContent kullanmak SVG ikonları siler.
+    // İşlem durumunu butonun görünür simgesini değiştirmeden başlıkta bildir.
+    var oldTitle=btn.title, oldLabel=btn.getAttribute('aria-label');
+    btn.disabled=true;
+    btn.title='PDF hazırlanıyor…';
+    btn.setAttribute('aria-label','PDF hazırlanıyor');
+    btn.classList.add('is-loading');
     makePdf(kind).then(function(blob){
       var fileName=makeFileName(kind), file;
       if(typeof File==='function') file=new File([blob],fileName,{type:'application/pdf'});
       else { file=blob; try{ file.name=fileName; }catch(e){} }
       preparedFiles[kind]=file;
       if(kind==='supplier'){
-        $('#btnSupplier').dataset.ready='1'; $('#btnSupplier').textContent='PDF hazır · Paylaş';
-        $('#btnWA').dataset.ready='1'; $('#btnWA').textContent='WhatsApp’ta Paylaş';
+        var supplierBtn=$('#btnSupplier'), waBtn=$('#btnWA');
+        supplierBtn.dataset.ready='1';
+        supplierBtn.title='PDF hazır · Tedarikçiye paylaşmak için tıklayın';
+        supplierBtn.setAttribute('aria-label','PDF hazır · Tedarikçiye paylaş');
+        waBtn.dataset.ready='1';
+        waBtn.title='PDF hazır · WhatsApp ile göndermek için tıklayın';
+        waBtn.setAttribute('aria-label','PDF hazır · WhatsApp ile gönder');
       }
       if(kind==='full'){
         downloadPdf(file);
         toast('PDF indirildi · '+formatBytes(file.size)+' · Yazılar netliği korunarak sıkıştırıldı.',8000);
       }else{
-        toast('Tedarikçi PDF’si hazır ('+formatBytes(file.size)+'). Göndermek için “PDF hazır · Paylaş” veya WhatsApp düğmesine tekrar dokunun.',9000);
+        toast('Tedarikçi PDF’si hazır ('+formatBytes(file.size)+'). Göndermek için zarf veya WhatsApp simgesine tekrar dokunun.',9000);
       }
     }).catch(function(err){
       console.error('PDF oluşturma hatası:',err);
       toast('PDF oluşturulamadı. İnternet bağlantısını kontrol edip tekrar deneyin.',8000);
-    }).then(function(){ btn.disabled=false; if(!preparedFiles[kind]) btn.textContent=old; });
+    }).then(function(){
+      btn.disabled=false;
+      btn.classList.remove('is-loading');
+      if(!preparedFiles[kind]){
+        btn.title=oldTitle;
+        if(oldLabel) btn.setAttribute('aria-label',oldLabel);
+      }
+    });
   }
 
   $('#btnWA').addEventListener('click', function(){
