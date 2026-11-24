@@ -356,9 +356,19 @@ table.kesim tfoot td{background:#cfd4dc;border-top:2px solid var(--navy)}
   var saveT;
   function clearPreparedFiles(){
     preparedFiles.supplier = null; preparedFiles.full = null;
+    // Durum sıfırlanırken simge butonlarının içeriğini değiştirme.
+    // textContent kullanımı SVG logoları ve zarf simgesini siler.
     var wa=$('#btnWA'), sup=$('#btnSupplier');
-    if(wa){ wa.dataset.ready=''; wa.textContent="WhatsApp'a Gönder"; }
-    if(sup){ sup.dataset.ready=''; sup.textContent='Tedarikçiye Gönder'; }
+    if(wa){
+      wa.dataset.ready='';
+      wa.title='WhatsApp ile gönder';
+      wa.setAttribute('aria-label','WhatsApp ile gönder');
+    }
+    if(sup){
+      sup.dataset.ready='';
+      sup.title='Tedarikçiye mesaj gönder / PDF hazırla';
+      sup.setAttribute('aria-label','Tedarikçiye mesaj gönder');
+    }
   }
   function save(){
     clearTimeout(saveT);
